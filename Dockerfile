@@ -14,7 +14,12 @@ RUN sudo apt -y install nodejs npm
 #Install Python and Rust
 RUN apt-get install -y python3 python3-pip
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
+RUN pip install flask
+RUN pip install Gunicorn
+
 ENV PATH="/root/.cargo/bin:${PATH}"
+ENV APP_HOME /APP_HOMEWORKDIR $APP_HOME
+ENV PORT=8080
 EXPOSE 8080
 
 WORKDIR /usr/src/app
