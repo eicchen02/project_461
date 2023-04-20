@@ -4,3 +4,6 @@ __pycache__/
 *.pdb
 target/
 log/
+local_cloning/cloned_repos
+output/*.txt
+output/*.json
