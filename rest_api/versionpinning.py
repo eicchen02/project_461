@@ -63,6 +63,8 @@ def count_pinned_dependencies(repo_url):
         return 1.0
     else:
         return pinned / count
+    
+    
 def main():
     '''Main function'''
     urlInput = sys.argv[1]
@@ -72,6 +74,8 @@ def main():
         gitURL = urlInput
     count_dep = count_pinned_dependencies(gitURL)
     print(f'{count_dep}')
+
+
 if __name__ == "__main__":
     main()
     
