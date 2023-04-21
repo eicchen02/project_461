@@ -10,6 +10,7 @@ app = Flask(__name__)
 def login():
     if request.method == "POST":
         link_local = request.form["link_input"]
+        subprocess.run(["ls"])
         f = open("temp_link.txt", "w+")
         f.write(link_local)
         f.close()
