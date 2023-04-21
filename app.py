@@ -3,6 +3,7 @@ import subprocess
 import os
 from json import load
 from time import sleep
+from os import remove
  
 app = Flask(__name__)
 
@@ -10,7 +11,10 @@ app = Flask(__name__)
 def login():
     if request.method == "POST":
         link_local = request.form["link_input"]
-        subprocess.run(["ls"])
+
+        if(link_local.find("github") and link_local.find("npm") == -1):
+            return redirect(url_for("error_link"))
+        
         f = open("temp_link.txt", "w+")
         f.write(link_local)
         f.close()
@@ -25,12 +29,27 @@ def login():
 
 @app.route("/done")
 def display():
-    test_text = load(open("output/output.json"))
-    
-    if(len(test_text) ==  0):
-       test_text = "ERROR: file can't be read"  
+    try:
+        test_text = load(open("output/output.json"))
+        remove("output/output.json")
+        render_template("test.html", variable = test_text)
 
-    return render_template("test.html", variable = test_text)
+    except:
+       return redirect(url_for("error_output"))
+
+    
+
+@app.route("/error")
+def error():
+    return f'<h1> Whoops, Error! <h1>'
+
+@app.route("/error_link")
+def error_link():
+    return f'<h2> Your input was invald, please use a valid Github/npm link <h2>'
+
+@app.route("/error_output")
+def error_output():
+    return f'<h2> Output could not be read/errored <h2>'
 
  
 if __name__ == "__main__": 
