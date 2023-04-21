@@ -2,6 +2,7 @@ from flask import Flask,render_template,request, redirect, url_for, session
 import subprocess
 import os
 from json import load
+from time import sleep
  
 app = Flask(__name__)
 
@@ -9,12 +10,13 @@ app = Flask(__name__)
 def login():
     if request.method == "POST":
         link_local = request.form["link_input"]
-        f = open("log/temp_link.txt", "w+")
+        f = open("temp_link.txt", "w+")
         f.write(link_local)
         f.close()
         
-        subprocess.run(["./run", "showscore", "log/temp_link.txt"])
+        subprocess.run(["./run", "showscore", "temp_link.txt"])
         # session['link'] = link_local
+        sleep(2)
         return redirect(url_for("display"))
     else:
 	    return render_template("form.html")
