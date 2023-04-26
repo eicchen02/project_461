@@ -22,10 +22,7 @@ updated_code = []
 version_pinning = []
 
 # open the command line argument file
-input_file = open(sys.argv[1], "r")
-
-#read the file and split at the newlines, giving a list of all the URLs
-urls = input_file.read().splitlines() 
+url = sys.argv[1]
 
 #set the directory with the metric output files
 output_file_locations = Path("metric_out_files/")
@@ -86,7 +83,7 @@ url_idx = 0
 # loop through all the netscores and put the appropriate metrics in the appropriate dictionaries
 for x in netscore:
     output.append({})
-    (output[url_idx]).update({"URL":urls[url_idx]})
+    (output[url_idx]).update({"URL":url})
     (output[url_idx]).update({"NET_SCORE":round(netscore[url_idx], 2)})
     (output[url_idx]).update({"RAMP_UP_SCORE":round(rampup[url_idx], 2)})
     (output[url_idx]).update({"UPDATED_CODE_SCORE":round(updated_code[url_idx], 2)})

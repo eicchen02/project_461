@@ -5,10 +5,7 @@ import subprocess
 from subprocess import DEVNULL
 
 # open the command line argument file
-input_file = open(sys.argv[1], "r")
-
-# read the file and split at the newlines, giving a list of all the URLs
-url = input_file.readline()
+url = sys.argv[1]
 
 # make a directory named 'cloned_repos' to put the cloned repos in
 os.mkdir("local_cloning/cloned_repos/")

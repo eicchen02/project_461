@@ -5,53 +5,36 @@ from json import load
 from time import sleep
 from os import remove
  
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates', static_folder='templates/static')
 
-@app.route("/", methods=["POST", "GET"])
-def login():
-    if request.method == "POST":
-        link_local = request.form["link_input"]
+@app.route('/')
+def home():
+    return render_template('Home.html')
 
-        if(link_local.find("github") and link_local.find("npm") == -1):
-            return redirect(url_for("error_link"))
-        
-        f = open("temp_link.txt", "w+")
-        f.write(link_local)
-        f.close()
-        
-        subprocess.run(["./run", "showscore", "temp_link.txt"])
-        # session['link'] = link_local
-        sleep(2)
-        return redirect(url_for("display"))
-    else:
-	    return render_template("form.html")
-    
+@app.route('/database/')
+def database():
+    return render_template('Database.html')
 
-@app.route("/done")
-def display():
-    try:
-        test_text = load(open("output/output.json"))
-        remove("output/output.json")
-        render_template("test.html", variable = test_text)
+@app.route('/packages/')
+def packages():
+    return render_template('PackageList.html')
 
-    except:
-       return redirect(url_for("error_output"))
+@app.route('/database/upload')
+def upload():
+    return render_template('interactions/Upload.html')
 
-    
+@app.route('/database/update/')
+def update():
+    return render_template('/interactions/Update.html')
 
-@app.route("/error")
-def error():
-    return f'<h1> Whoops, Error! <h1>'
+@app.route('/database/rate/')
+def rate():
+    return render_template('interactions/Rate.html')
 
-@app.route("/error_link")
-def error_link():
-    return f'<h2> Your input was invald, please use a valid Github/npm link <h2>'
+@app.route('/database/download/')
+def download():
+    return render_template('/interactions/Download.html')
 
-@app.route("/error_output")
-def error_output():
-    return f'<h2> Output could not be read/errored <h2>'
-
- 
 if __name__ == "__main__": 
     # app.run(host='localhost', port=8080)
     app.run(debug = True, host = '0.0.0.0', port  = int(os.environ.get('PORT', 8080)))
