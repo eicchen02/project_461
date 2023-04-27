@@ -12,7 +12,7 @@ def login():
     if request.method == "POST":
         link_local = request.form["link_input"]
 
-        if(link_local.find("github") and link_local.find("npm") == -1):
+        if(link_local.find("github") and link_local.find("npm") == 0):
             return redirect(url_for("error_link"))
         
         f = open("temp_link.txt", "w+")
@@ -21,7 +21,6 @@ def login():
         
         subprocess.run(["./run", "showscore", "temp_link.txt"])
         # session['link'] = link_local
-        sleep(2)
         return redirect(url_for("display"))
     else:
 	    return render_template("form.html")
@@ -32,7 +31,7 @@ def display():
     try:
         test_text = load(open("output/output.json"))
         remove("output/output.json")
-        render_template("test.html", variable = test_text)
+        return render_template("test.html", variable = test_text)
 
     except:
        return redirect(url_for("error_output"))

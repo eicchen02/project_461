@@ -31,7 +31,7 @@ if __name__ == "__main__":
     query = db.select(test) 
     ResultProxy = connection.execute(query)
     ResultSet = ResultProxy.fetchall()
-    # print(test.columns.keys())
+    print(test.columns)
     print(ResultSet)
 
 
