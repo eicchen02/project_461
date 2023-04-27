@@ -18,19 +18,20 @@ def login():
         f = open("temp_link.txt", "w+")
         f.write(link_local)
         f.close()
-        
+
         subprocess.run(["./run", "showscore", "temp_link.txt"])
-        # session['link'] = link_local
-        return redirect(url_for("display"))
+        subprocess.run(["python3", "sql/upload.py"])
+        
+        return redirect(url_for("done"))
     else:
 	    return render_template("form.html")
-    
+     
 
 @app.route("/done")
-def display():
+def done():
     try:
         test_text = load(open("output/output.json"))
-        remove("output/output.json")
+        # remove("output/output.json")
         return render_template("test.html", variable = test_text)
 
     except:

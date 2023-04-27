@@ -7,6 +7,9 @@ fn main() {
     //save the command line argument
     let cli_input: Vec<String> = env::args().collect();
 
+    //this will remove output files and locally cloned repos
+    clean_up();
+
     //Obtain flag from ./run (-s or -p)
     let flag: &String = &cli_input[3];
 
@@ -112,6 +115,7 @@ fn main() {
 
     //Print results and clean files on -p, save results and not print on -s
     if flag == "-p" {
+
         //print the results (print_results.py)
         let _print_results = Command::new("python3")
             .arg("output/print_results.py")
@@ -131,8 +135,7 @@ fn main() {
             std::process::exit(1);
         }
 
-        //this will remove output files and locally cloned repos
-        clean_up();
+
     }
 
     //exit 0 on success
