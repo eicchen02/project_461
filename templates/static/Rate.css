@@ -21,11 +21,6 @@
   margin: 31px auto 0;
 }
 
-.u-section-1 .u-form-1 {
-  width: 570px;
-  margin: 40px auto 60px;
-}
-
 @media (max-width: 1199px) {
   .u-section-1 .u-sheet-1 {
     min-height: 670px;

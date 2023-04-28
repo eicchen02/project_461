@@ -40,7 +40,7 @@
 </li><li class="u-nav-item"><a class="u-active-grey-5 u-button-style u-hover-grey-10 u-nav-link u-text-active-grey-90 u-text-grey-90 u-text-hover-grey-90" href="{{ url_for('update') }}" style="padding: 10px 20px;">Update</a>
 </li><li class="u-nav-item"><a class="u-active-grey-5 u-button-style u-hover-grey-10 u-nav-link u-text-active-grey-90 u-text-grey-90 u-text-hover-grey-90" href="{{ url_for('rate') }}" style="padding: 10px 20px;">Rate</a>
 </li><li class="u-nav-item"><a class="u-active-grey-5 u-button-style u-hover-grey-10 u-nav-link u-text-active-grey-90 u-text-grey-90 u-text-hover-grey-90" href="{{ url_for('download') }}" style="padding: 10px 20px;">Download</a>
-</li><li class="u-nav-item"><a class="u-active-grey-5 u-button-style u-hover-grey-10 u-nav-link u-text-active-grey-90 u-text-grey-90 u-text-hover-grey-90" href="{{ url_for('packages') }}" style="padding: 10px 20px;">Packages</a>
+</li><li class="u-nav-item"><a class="u-active-grey-5 u-button-style u-hover-grey-10 u-nav-link u-text-active-grey-90 u-text-grey-90 u-text-hover-grey-90" href="{{ url_for('packageList') }}" style="padding: 10px 20px;">Packages</a>
 </li></ul>
           </div>
           <div class="u-custom-menu u-nav-container-collapse">
@@ -53,7 +53,7 @@
 </li><li class="u-nav-item"><a class="u-button-style u-nav-link" href="{{ url_for('update') }}">Update</a>
 </li><li class="u-nav-item"><a class="u-button-style u-nav-link" href="{{ url_for('rate') }}">Rate</a>
 </li><li class="u-nav-item"><a class="u-button-style u-nav-link" href="{{ url_for('download') }}">Download</a>
-</li><li class="u-nav-item"><a class="u-button-style u-nav-link" href="{{ url_for('packages') }}">Packages</a>
+</li><li class="u-nav-item"><a class="u-button-style u-nav-link" href="{{ url_for('packageList') }}">Packages</a>
 </li></ul>
               </div>
             </div>
@@ -66,26 +66,11 @@
       <div class="u-clearfix u-sheet u-valign-middle-xs u-sheet-1">
         <h1 class="u-custom-font u-font-montserrat u-text u-text-body-alt-color u-title u-text-1">Upload A Package</h1>
         <h4 class="u-text u-text-2">Upload a GitHub or NPM package to our database</h4>
-        <!-- Below this is the "Form" where someone insert a package. 
-        This is tied to an email currently I think? Need to not tie it
-        to an email, and instead call the SQL upload function once it's made-->
-        <div class="u-form u-form-1">
-          <form action="https://forms.nicepagesrv.com/v2/form/process" class="u-clearfix u-form-spacing-10 u-form-vertical u-inner-form" source="email" name="download" style="padding: 10px;">
-            <div class="u-form-group u-form-name">
-              <label for="name-5c53" class="u-label">URL</label>
-              <input type="text" placeholder="GitHub/NPM URL" id="name-5c53" name="name" class="u-input u-input-rectangle" required="">
-            </div>
-            <div class="u-align-center u-form-group u-form-submit">
-              <a href="#" class="u-btn u-btn-submit u-button-style">Upload<br>
-              </a>
-              <input type="submit" value="submit" class="u-form-control-hidden">
-            </div>
-            <div class="u-form-send-message u-form-send-success">Thank you! Your package has been uploaded!</div>
-            <div class="u-form-send-error u-form-send-message">Unable to upload package. Make sure your URL is valid.</div>
-            <input type="hidden" value="" name="recaptchaResponse">
-            <input type="hidden" name="formServices" value="2a8603211462268dd38cef63858ee109">
-          </form>
-        </div>
+        <!-- Below is the new form for obtaining input for upload function-->
+        <form action="#" method="post">
+          <p><input type="text" name="upload_input" style="color:black;"></p>
+          <input type="submit" value="Submit" style="background-color:white; color:black;">
+        </form>
         <!-- Here is the end of the form -->
       </div>
     </section>

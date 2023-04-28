@@ -2,10 +2,14 @@ use std::env; //rust stdlib function to get command line args
 use std::fs; //rust file library
 use std::process;
 use std::process::Command; //library to run processes in rust
+use std::path::Path;
 
 fn main() {
     //save the command line argument
     let cli_input: Vec<String> = env::args().collect();
+
+    //this will remove output files and locally cloned repos
+    clean_up();
 
     //Obtain flag from ./run (-s, -p, -u)
     let flag: &String = &cli_input[3];
@@ -138,7 +142,7 @@ fn main() {
         .expect("Err");
 
     //Print results and clean files on -p, save results and not print on -s
-    if flag == "-p" {
+    if flag == "-p" || flag == "-u" {
         //print the results (print_results.py)
         let _print_results = Command::new("python3")
             .arg("output/print_results.py")
@@ -158,8 +162,6 @@ fn main() {
             std::process::exit(1);
         }
 
-        //this will remove output files and locally cloned repos
-        clean_up();
     }
 
     //exit 0 on success
@@ -169,60 +171,74 @@ fn main() {
 //this function removes locally cloned repos and output files
 fn clean_up() {
     //remove local clone repos
-    let _clean_old_clones = match fs::remove_dir_all("local_cloning/cloned_repos/") {
-        Ok(_clean_old_clones) => _clean_old_clones,
-        Err(..) => {
-            println!("Error cleaning old cloned repos!\n");
-            std::process::exit(1);
-        }
-    };
+    if Path::new("local_cloning/cloned_repos/").is_dir(){
+        let _clean_old_clones = match fs::remove_dir_all("local_cloning/cloned_repos/") {
+            Ok(_clean_old_clones) => _clean_old_clones,
+            Err(..) => {
+                println!("Error cleaning old cloned repos!\n");
+                std::process::exit(1);
+            }
+        };
+    }
 
     //clean output files for each metric
-    let _clean_correctness = match fs::remove_file("output/correctness_out.txt") {
-        Ok(_clean_correctness) => _clean_correctness,
-        Err(..) => {
-            println!("Error cleaning correctness output!\n");
-            std::process::exit(1);
-        }
-    };
+    if Path::new("output/correctness_out.txt").exists(){
+        let _clean_correctness = match fs::remove_file("output/correctness_out.txt") {
+            Ok(_clean_correctness) => _clean_correctness,
+            Err(..) => {
+                println!("Error cleaning correctness output!\n");
+                std::process::exit(1);
+            }
+        };
+    }
 
-    let _clean_license = match fs::remove_file("output/license_out.txt") {
-        Ok(_clean_license) => _clean_license,
-        Err(..) => {
-            println!("Error cleaning license output!\n");
-            std::process::exit(1);
-        }
-    };
+    if Path::new("output/license_out.txt").exists(){
+        let _clean_license = match fs::remove_file("output/license_out.txt") {
+            Ok(_clean_license) => _clean_license,
+            Err(..) => {
+                println!("Error cleaning license output!\n");
+                std::process::exit(1);
+            }
+        };
+    }
 
-    let _clean_rampup = match fs::remove_file("output/rampup_out.txt") {
-        Ok(_clean_rampup) => _clean_rampup,
-        Err(..) => {
-            println!("Error cleaning rampup output!\n");
-            std::process::exit(1);
-        }
-    };
+    if Path::new("output/rampup_out.txt").exists(){
+        let _clean_rampup = match fs::remove_file("output/rampup_out.txt") {
+            Ok(_clean_rampup) => _clean_rampup,
+            Err(..) => {
+                println!("Error cleaning rampup output!\n");
+                std::process::exit(1);
+            }
+        };
+    }
 
-    let _clean_busfactor = match fs::remove_file("output/busfactor_out.txt") {
-        Ok(_clean_rampup) => _clean_rampup,
-        Err(..) => {
-            println!("Error cleaning busfactor output!\n");
-            std::process::exit(1);
-        }
-    };
+    if Path::new("output/busfactor_out.txt").exists(){
+        let _clean_busfactor = match fs::remove_file("output/busfactor_out.txt") {
+            Ok(_clean_rampup) => _clean_rampup,
+            Err(..) => {
+                println!("Error cleaning busfactor output!\n");
+                std::process::exit(1);
+            }
+        };
+    }
 
-    let _clean_updatedcode = match fs::remove_file("output/updatedcode_out.txt") {
-        Ok(_clean_rampup) => _clean_rampup,
-        Err(..) => {
-            println!("Error cleaning updatedcode output!\n");
-            std::process::exit(1);
-        }
-    };
+    if Path::new("output/updatedcode_out.txt").exists(){
+        let _clean_updatedcode = match fs::remove_file("output/updatedcode_out.txt") {
+            Ok(_clean_rampup) => _clean_rampup,
+            Err(..) => {
+                println!("Error cleaning updatedcode output!\n");
+                std::process::exit(1);
+            }
+        };
+    }
 
-    let _clean_respmain = match fs::remove_file("output/resp_maintain_out.txt") {
-        Ok(_clean_respmain) => _clean_respmain,
-        Err(..) => {
-            println!("Error cleaning responsive maintainer output!\n");
-            std::process::exit(1);
-        }
-    };
+    if Path::new("output/resp_maintain_out.txt").exists(){
+        let _clean_respmain = match fs::remove_file("output/resp_maintain_out.txt") {
+            Ok(_clean_respmain) => _clean_respmain,
+            Err(..) => {
+                println!("Error cleaning responsive maintainer output!\n");
+                std::process::exit(1);
+            }
+        };
+    }
 }
