@@ -25,8 +25,13 @@ ENV GIT_PYTHON_REFRESH=quiet
 
 # Probably needs to be revisited
 ENV GITHUB_TOKEN=${GITHUB_TOKEN} 
+ENV SQL_LINK=${SQL_LINK}
+ENV SQL_USER=${SQL_USER}
+ENV SQL_PASSWORD=${SQL_PASSWORD}
+ENV SQL_DB="461-database"
+
 
 RUN ./run build
 
-
-CMD ./run showscore ShortSample.txt
+# CMD ./run showscore ShortSample.txt
+CMD python3 app.py

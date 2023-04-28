@@ -21,7 +21,8 @@ def login():
 
         subprocess.run(["./run", "showscore", "temp_link.txt"])
         subprocess.run(["python3", "sql/upload.py"])
-        
+        sleep(0.5)
+
         return redirect(url_for("done"))
     else:
 	    return render_template("form.html")
@@ -31,7 +32,7 @@ def login():
 def done():
     try:
         test_text = load(open("output/output.json"))
-        # remove("output/output.json")
+        remove("output/output.json")
         return render_template("test.html", variable = test_text)
 
     except:
