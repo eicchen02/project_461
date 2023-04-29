@@ -20,8 +20,9 @@ def login():
         f.close()
 
         subprocess.run(["./run", "showscore", "temp_link.txt"])
-        subprocess.run(["python3", "sql/upload.py"])
         sleep(0.5)
+        subprocess.run(["python3", "sql/upload.py"])
+
 
         return redirect(url_for("done"))
     else:

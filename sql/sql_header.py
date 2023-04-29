@@ -1,10 +1,11 @@
-from google.cloud.sql.connector import Connector
+from google.cloud.sql.connector import Connector, IPTypes
 import pymysql
 import sqlalchemy as db
 import os
 
-# initialize Connector object
-connector = Connector()
+ip_type = IPTypes.PRIVATE if os.environ.get("PRIVATE_IP") else IPTypes.PUBLIC
+
+connector = Connector(ip_type)
 
 # function to return the database connection
 def getconn() -> pymysql.connections.Connection:
