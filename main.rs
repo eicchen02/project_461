@@ -27,7 +27,7 @@ fn main() {
         //Determing what the input is (either base64 encoded file, or URL)
         let cloned_repo_id = Command::new("python3")
             .arg("input/obtainURL.py")
-            .arg(&cli_input[2])
+            .arg(&url)
             .output()
             .expect("Err");
         let mut input = String::from_utf8(cloned_repo_id.stdout).unwrap();
@@ -181,6 +181,16 @@ fn clean_up() {
         };
     }
 
+    if Path::new("temp_file.txt").exists(){
+        let _clean_correctness = match fs::remove_file("temp_file.txt") {
+            Ok(_clean_correctness) => _clean_correctness,
+            Err(..) => {
+                println!("Error removing temp_file.txt!\n");
+                std::process::exit(1);
+            }
+        };
+    }
+
     //clean output files for each metric
     if Path::new("output/correctness_out.txt").exists(){
         let _clean_correctness = match fs::remove_file("output/correctness_out.txt") {
@@ -237,6 +247,16 @@ fn clean_up() {
             Ok(_clean_respmain) => _clean_respmain,
             Err(..) => {
                 println!("Error cleaning responsive maintainer output!\n");
+                std::process::exit(1);
+            }
+        };
+    }
+
+    if Path::new("output/pinningpractice_out.txt").exists(){
+        let _clean_respmain = match fs::remove_file("output/pinningpractice_out.txt") {
+            Ok(_clean_respmain) => _clean_respmain,
+            Err(..) => {
+                println!("Error cleaning pinning practice output!\n");
                 std::process::exit(1);
             }
         };
