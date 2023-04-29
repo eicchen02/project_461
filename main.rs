@@ -181,16 +181,6 @@ fn clean_up() {
         };
     }
 
-    if Path::new("temp_file.txt").exists(){
-        let _clean_correctness = match fs::remove_file("temp_file.txt") {
-            Ok(_clean_correctness) => _clean_correctness,
-            Err(..) => {
-                println!("Error removing temp_file.txt!\n");
-                std::process::exit(1);
-            }
-        };
-    }
-
     //clean output files for each metric
     if Path::new("output/correctness_out.txt").exists(){
         let _clean_correctness = match fs::remove_file("output/correctness_out.txt") {
