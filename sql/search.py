@@ -28,6 +28,7 @@ def main():
 
     foundNames = []
     # interact with Cloud SQL database using connection pool
+    pool = connect_tcp_socket()
     with pool.connect() as db_conn:
         # query database
         t = sqlalchemy.text("SELECT * FROM Packages")

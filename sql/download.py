@@ -50,7 +50,8 @@ def download(repo_link):
 def main():
     '''Calling function for download'''
     package_name = sys.argv[1]
-
+    
+    pool = connect_tcp_socket()
     with pool.connect() as db_conn:
         t = sqlalchemy.text("SELECT * FROM Packages")
         result = db_conn.execute(t)

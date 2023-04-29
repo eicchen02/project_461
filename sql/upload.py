@@ -39,6 +39,7 @@ def upload():
     except:
         raise("Error reading readme")
 
+    pool = connect_tcp_socket()
     connection = pool.connect()
     metadata = db.MetaData()
     table = db.Table('Packages', metadata, autoload_with=pool)
