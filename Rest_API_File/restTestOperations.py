@@ -1,12 +1,13 @@
 import requests
 
 def main():
-    # Test authenticate
+    # Testing (Authenticate)
     response = requests.put("http://127.0.0.1:8080/authenticate", json={'Secret': {'password': 'TestTest'},
                                                                         'User': {'isAdmin': True,
                                                                                  'name': 'Test'}})
     print(f'Authentication Test: {response.json()}\n')
     
+    # Testing (Package Create)
     response = requests.post("http://127.0.0.1:8080/package", headers={'X-Authorization': 'Test'}, json={'Content': '',
                                                                                                         'JSProgram': '', 
                                                                                                         'URL': 'https://github.com/cloudinary/cloudinary_npm'})
@@ -18,5 +19,13 @@ def main():
         print(f'Package Create Test, Grabbing metadata: {metadata}\n')
     else:
         print(f'The package was not uploaded, due to a error code {response.status_code}')
+
+    #! Testing (Package Delete)
+    
+    #! Testing (Package By Id)
+    
+    # Testing (Package By Regex)
+    
+    
 if __name__ == "__main__":
     main()

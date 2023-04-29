@@ -51,6 +51,7 @@ def CreateAuthToken():
                     'message': 'This system does not support authentication'}), 501, {'content_type': 'application/json'}
 
 #? /package path uploads a new package
+@app.route('/package', methods=["POST"])
 def PackageCreate():
     # Grabs the global id_counter for adding packages
     global id_counter
@@ -121,7 +122,7 @@ def PackageCreate():
                     'data': f'{packageData}',
                     'metadata': f'{metadata}'}), 201, {'content_type': 'application/json'}
 
-
+@app.route('/package/byName/{name}', methods=["DELETE"])
 def PackageByNameDelete(name=None):
     # Check if a name is actually passed, and return error if not
     if name == None:
@@ -138,6 +139,7 @@ def PackageByNameDelete(name=None):
     return jsonify({'status_code': '200',
                     'message': 'Package is deleted'}), 200, {'content_type': 'application/json'}
 
+@app.route('/package/byName/{name}', methods=["GET"])
 def PackageByNameGet(name=None):
     # Check if a name is actually passed, and return error if not
     if name == None:
@@ -158,39 +160,134 @@ def PackageByNameGet(name=None):
     '''
     
     # Temp return for now
-    return jsonify({'code': '200',
-                    'message': 'This is a test, must implement later'})
+    return jsonify({'status_code': '200',
+                    'message': 'This is a test, must implement later'}), 200, {'content_type': 'application/json'}
 
+#? This uses the search function that we have created
+@app.route('/package/byRegEx', methods=["POST"])
 def PackageByRegExGet():
-    # Loads and checks the data from the request
+    # Loads and checks the data from the request.
+    #! Assuming currently that this is saved in the json under the 'regex' key. May not be in actuality
+    regex = json.loads(request.data)["regex"]
+    if regex == None:
+        return jsonify({'status_code': '400',
+                        'message': 'There must be a regular expression that can be used in the body.'}), 400, {'content_type': 'application/json'}
+    
+    # Otherwise, perform search function through SQL database
+    #! Need to implement SQL functionality to search correctly for a RegEx expression through READMEs and names
+    
+    # If the package is not found, return 404 error
+    #! Need to implement SQL functionality before checking.
+    
+    # Otherwise, return a list of all packages that match
+    #! Need to implement SQL functionality beforehand. Returns should be of type PackageMetadata, which includes ID, packageName, and version
+    
+    # Temp return for now
+    return jsonify({'status_code': '200',
+                    'message': 'This is a test, must implement later'}), 200, {'content_type': 'application/json'}
+
+@app.route('/package/{id}', methods=["DELETE"])
+def PackageDelete(id=None):
+    # First, check if ID is none
+    if id == None:
+        return jsonify({'status_code': '400', 
+                        'message': 'There must be an ID value in order to delete packages'}), 400, {'content_type': 'application/json'}
+    
+    # Then, check if package is within SQL database by ID
+    #! Need to implement SQL functionality beforehand to search through database. Return 404 if not in database
+    
+    # Finally, return 200 if deleted
+    return jsonify({'status_code': '200',
+                    'message': 'Package is deleted'}), 200, {'content_type': 'application/json'}
+
+@app.route('/package/{id}', methods=["GET"])
+def PackageRetrieve(id=None):
+    # First, check if ID is none
+    if id == None:
+        return jsonify({'status_code': '400',
+                        'message': 'There must be an ID value in order to delete packages'}), 400, {'content_type': 'application/json'}
+    
+    # Then, check if package exists in the SQL database
+    #! Need to implement SQL functionality beforehand to search through database. Return 404 if not in database
+    
+    # Then, convert package into base64/obtain base64 package for PackageData type field
+    #! Need to implement SQL functionality beforehand to obtain the URL/Base64 package uploaded.
+    
+    # Finally, return Package to user. Should follow the 'Package' Schema, which involves 'PackageData' and 'PackageMetadata'
+    #! Need to implement SQL first to get data
+    return jsonify({'code': '200',
+                    'message': 'This is a test, must implement later'}), 200, {'content_type': 'application/json'}
+
+#? This will replace the current ID with a new package version (update), as long as ID, version, and name match
+@app.route('/package/{id}', methods=["PUT"])
+def PackageUpdate(id=None):
+    # First, check if ID is none
+    if id == None:
+        return jsonify({'status_code': '400',
+                        'message': 'There must be an ID value in order to delete packages'}), 400, {'content_type': 'application/json'}
+    
+    # Next, obtain data from response.
+    #! Assuming that the data is found in 'data'. Might be wrong and need to change
     data = json.loads(request.data)
     
+    # Then, check that there is an ID, name, and version provided
+    if not data["id"]:
+        return jsonify({'status_code': '400',
+                        'message': 'There are missing field(s) in the request body. There must be an \'id\', \'name\', and \'version\'.'}), 400, {'content_type': 'application/json'}
+    elif not data["name"]:
+        return jsonify({'status_code': '400',
+                        'message': 'There are missing field(s) in the request body. There must be an \'id\', \'name\', and \'version\'.'}), 400, {'content_type': 'application/json'}
+    elif not data["version"]:
+        return jsonify({'status_code': '400',
+                        'message': 'There are missing field(s) in the request body. There must be an \'id\', \'name\', and \'version\'.'}), 400, {'content_type': 'application/json'}
+    
+    # Then, check if id/name/version match in database. Start with id, then check name and version associated with that id
+    #! Need to implement SQL functionality beforehand to search through database. Return error code 404 if it does not match
 
-def PackageDelete():
-    return jsonify({'code': '200',
-                    'message': 'This is a test, must implement later'})
+    # Update the values for the id
+    #! Need to implement SQL functionality beforehand. Then, do the same as for PackageCreate does.
+    
+    # Finally, return 200 status code
 
-def PackageRetrieve():
-    return jsonify({'code': '200',
-                    'message': 'This is a test, must implement later'})
+    return jsonify({'status_code': '200',
+                    'message': 'Version is updated'}), 200, {'content_type': 'application/json'}
 
-def PackageUpdate():
-    return jsonify({'code': '200',
-                    'message': 'This is a test, must implement later'})
+#? This is the rating function for a package's id value
+@app.route('/package/{id}/rate', methods=["GET"])
+def PackageRate(id=None):
+    # First, check if id is None
+    if id == None:
+        return jsonify({'status_code': '400',
+                        'message': 'There must be a valid ID in order to rate packages'}), 400, {'content_type': 'application/json'}
+    
+    # Then, obtain the scores from the SQL database
+    #! Need to implement SQL functionality to obtain store values. If the package ID does not exist, return 404. If a score is -1 or failed, return 500.
+    
+    # Then, need to format scores according to the PackageRating definition in the YAML.
+    #! Need SQL scores to do this
+    
+    # Finally, return 200 and PackageRating if successful
+    return jsonify({'status_code': '200',
+                    'message': 'Rating was successful. View the scores for the package in the \'rate\' section.',
+                    'rate': 'This is a test, put values here when completed'}), 200, {'content_type': 'application/json'}
 
-def PackageRate():
-    return jsonify({'code': '200',
-                    'message': 'This is a test, must implement later'})
-
+#? This is the fetch command. Need to understand it more
+#! No idea how to do this currently, must examine later
+@app.route('/packages', methods=["POST"])
 def PackagesList():
-    return jsonify({'code': '200',
-                    'message': 'This is a test, must implement later'})
+    return jsonify({'status_code': '200',
+                    'message': 'This is a test, must implement later'}), 200, {'content_type': 'application/json'}
 
+#? This is the SQL reset
+#! Need a working SQL database in order to complete this
+@app.route('/reset', methods=["DELETE"])
 def RegistryReset():
-    return jsonify({'code': '200',
-                    'message': 'This is a test, must implement later'})
+    return jsonify({'status_code': '200',
+                    'message': 'Registry is reset'}), 200, {'content_type': 'application/json'}
 
-if __name__ == "__main__": 
+
+# Main function call to start backend/frontend
+if __name__ == "__main__":
     # app.run(host='localhost', port=8080)
     application.add_api('api-spec.yaml')
     app.static_folder = ('templates/static')
