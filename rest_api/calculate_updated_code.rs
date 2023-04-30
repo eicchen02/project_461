@@ -27,9 +27,9 @@ fn main(){
     //Call information with rest_api functions for each url
 
     let fractionnew = Command::new("python3").arg("rest_api/pullRequests.py").arg(url).output().expect("Err");
-    write!(log2, "\nFraction of code released through pull requests for url {}: {:?}\n", url, &fractionnew.stdout).expect("Error writing to log");
         
 	let mut fraction_new = String::from_utf8(fractionnew.stdout).unwrap();
+
     fraction_new.pop();
 	let updated_code : f64 = fraction_new.parse().unwrap();
 
