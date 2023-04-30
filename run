@@ -28,6 +28,8 @@ elif [ "$1" == 'score' ]; then
     ./target/debug/main "$@" -s;
 elif [ "$1" == 'showscore' ]; then
     ./target/debug/main "$@" -p;
+elif [ "$1" == 'upload' ]; then
+    ./target/debug/main "$@" -u;
 else
     echo "Invalid Input";
     exit 5
