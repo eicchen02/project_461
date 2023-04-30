@@ -6,6 +6,7 @@ from json import load
 from time import sleep
 from os import remove
 import connexion
+from sys import stderr
 
 id_counter = 0
 application = connexion.FlaskApp(__name__, specification_dir='Rest_API_File/')
@@ -50,6 +51,7 @@ def upload():
         
         #* Grabs the package URL from the upload form
         package_url = request.form["upload_input"]
+        print("Input package_url: "+ package_url, file = stderr)
         
         #* Checks to make sure that the input is a GitHub or NPM link
         if("github.com" not in package_url and "npmjs.com" not in package_url):
