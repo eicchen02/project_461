@@ -14,19 +14,7 @@ fn main(){
     let cli_input: Vec<String> = env::args().collect(); 
 
     //create a variable for the file path and save the first command line argument into it
-    let filepath = &cli_input[1]; 
-
-    //take the contents of the file and save into a single string
-    let data = match fs::read_to_string(filepath){
-        Ok(data) => data,
-        Err(..) => {
-            println!("Error reading the input file!\n");
-            std::process::exit(1);
-        }
-    };
-
-    //now, chop this string into a vector at every newline since the URLS are newline delimited
-    let _urls: Vec<&str> = data.split('\n').collect();
+    let url = &cli_input[1]; 
 
     //if the logfiles exist from a previous run, delete them
     let is_logv1 = Path::new("log/logv1.txt").exists();
@@ -55,19 +43,7 @@ fn main(){
     }
 
     //open new logfiles after cleaning old ones
-    let mut log1 = BufWriter::new(File::create("log/logv1.txt").expect("Error creating log1 file!"));
     let mut log2 = BufWriter::new(File::create("log/logv2.txt").expect("Error creating log2 file!"));
-
-    //get number of URLS and log the count
-    let num_urls = _urls.len();
-    write!(log1, "Number of URLs in the input file: {0}\n", num_urls).expect("Error writing to log1!");
-
-    //loop through urls and log their corresponding clone folder numbers
-    let mut url_index = 1;
-    for url in _urls {
-        write!(log2, "Folder number and url:     {} / {}\n", url_index, url).expect("Error writing to log2!");
-        url_index += 1;
-    }
     
     //check if the cloned repos folder is already there from a previous run, and delete it if so
     let is_cloned_repos = Path::new("local_cloning/cloned_repos/").exists();
@@ -83,8 +59,14 @@ fn main(){
         };
     }
     
-    //run clone function to locally clone repos (pass in the input file)
-    clone_repos((&filepath).to_string());
+    //run clone_repo.py
+    let _run_clone_script = Command::new("python3").arg("local_cloning/clone_repo.py").arg(&url).status().expect("Err");
+
+    //if the clone script didnt return success, exit 1 and print error
+    if _run_clone_script.success() == false {
+        println!("Error cloning repos!");
+        std::process::exit(1);
+    }
 
     //open up the directory with all the cloned repos
     let cloned_folders = match fs::read_dir("local_cloning/cloned_repos/"){
@@ -160,18 +142,5 @@ fn calculate_ramp_up(lines_of_code: u32, lines_of_comments: u32) -> f32{
         return calculated_score;
     }
 
-}
-
-//this function simply runs the file "clone_repo.py" which is located instide of the "461_project/local_cloning" directory
-fn clone_repos(filepath: String){
-
-    //run clone_repo.py
-    let _run_clone_script = Command::new("python3").arg("local_cloning/clone_repo.py").arg(&filepath).status().expect("Err");
-
-    //if the clone script didnt return success, exit 1 and print error
-    if _run_clone_script.success() == false {
-        println!("Error cloning repos!");
-        std::process::exit(1);
-    }
 }
 

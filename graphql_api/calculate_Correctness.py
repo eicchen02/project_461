@@ -5,38 +5,35 @@ import os
 
 github_token = os.getenv("GITHUB_TOKEN")
 
-with open(sys.argv[1], "r") as f:  # open file containing urls
-    urls = f.readlines()
+url = sys.argv[1]
 
 file_v2 = open("log/logv1.txt", "w")
 file_v3 = open("log/logv2.txt", "w")
 
-repositories = []
-for x in range(len(urls)):  # extract owner and name of each repository
-    file_v2.write(f"\n\n>>> Extracting information for url {urls[x]}\n")
+names = []
+file_v2.write(f"\n\n>>> Extracting information for url {url}\n")
   
-    repoName = urls[x].partition("github.com/")[2]  # extract "owner/repo"
+repoName = url.partition("github.com/")[2]  # extract "owner/repo"
 
-    if not repoName:  # if github.com/ is not found, extract as npmjs package
-        url = os.path.basename(urls[x].strip("\n"))
-        with open(f"local_cloning/cloned_repos/{url}/package.json") as json_File:
-            npmsRepo = json.load(json_File)  # load json file containing repo info
-        repoName = npmsRepo["repository"]  # extract repo info
+if not repoName:  # if github.com/ is not found, extract as npmjs package
+    url = os.path.basename(url.strip("\n"))
+    with open(f"local_cloning/cloned_repos/{url}/package.json") as json_File:
+        npmsRepo = json.load(json_File)  # load json file containing repo info
+    repoName = npmsRepo["repository"]  # extract repo info
 
-        if not isinstance(repoName, str):  # if a dict is returned instead of str
-            repoName = list(repoName.values())[1]  # extract url from dict
-            repoName = repoName.partition("github.com/")[2].replace(
-                ".git",""
-            )  # extract "owner/repo"
+    if not isinstance(repoName, str):  # if a dict is returned instead of str
+        repoName = list(repoName.values())[1]  # extract url from dict
+        repoName = repoName.partition("github.com/")[2].replace(
+            ".git",""
+        )  # extract "owner/repo"
   
-    repositories.append(
-        (repoName.partition("/")[0],repoName.partition("/")[2].replace("\n","")))  # append (owner, repo)
+names.append(
+    (repoName.partition("/")[0],repoName.partition("/")[2].replace("\n","")))  # append (owner, repo)
 
-url = "https://api.github.com/graphql"  # graphql url
 headers = {"Authorization": f"Bearer {github_token}"}  # build the header
 # run requests
 with open("output/correctness_out.txt", "w") as f:
-    for repository in repositories:
+    for repository in names:
         file_v2.write("\n\n>>> beginning correctness metric with GraphQL api\n")
 
         file_v3.write("\n\n------------------\n")
@@ -81,7 +78,7 @@ with open("output/correctness_out.txt", "w") as f:
                 )
 
             except:
-                file_v2.write("impproper repo format\n")
+                file_v2.write("improper repo format\n")
                 file_v3.write("improper repo format - error with repo\n")
 
             # print("Number of stars: %i" % starCount)

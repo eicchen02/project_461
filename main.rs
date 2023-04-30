@@ -11,12 +11,45 @@ fn main() {
     //this will remove output files and locally cloned repos
     clean_up();
 
-    //Obtain flag from ./run (-s or -p)
+    //this will remove output files and locally cloned repos
+    clean_up();
+
+    //this will remove output files and locally cloned repos
+    clean_up();
+
+    //Obtain flag from ./run (-s, -p, -u)
     let flag: &String = &cli_input[3];
+
+    //take the contents of the file and save into a single string
+    let mut url = match fs::read_to_string(&cli_input[2]){
+        Ok(url) => url,
+        Err(..) => {
+            println!("Error reading the input file!\n");
+            std::process::exit(1);
+        }
+    };
+
+    if flag == "-u"{
+        //Determing what the input is (either base64 encoded file, or URL)
+        let cloned_repo_id = Command::new("python3")
+            .arg("input/obtainURL.py")
+            .arg(&url)
+            .output()
+            .expect("Err");
+        let mut input = String::from_utf8(cloned_repo_id.stdout).unwrap();
+        input.pop();
+        if input == "-1"{
+            println!("Error: package.json does not have a valid URL");
+            process::exit(1);
+        }
+        else{
+            url = input;
+        }
+    }
 
     //run the rampup calculation (calculate_RampUp)
     let _run_rampup = Command::new("./target/debug/calculate_ramp_up")
-        .arg(&cli_input[2])
+        .arg(&url)
         .status()
         .expect("Err"); //runs the rust executable "calculate_RampUp" with the CLI input file
 
@@ -29,7 +62,7 @@ fn main() {
     //run the correctness calculation (calculate_Correctness)
     let _run_correctness = Command::new("python3")
         .arg("graphql_api/calculate_Correctness.py")
-        .arg(&cli_input[2])
+        .arg(&url)
         .status()
         .expect("Err");
 
@@ -41,7 +74,7 @@ fn main() {
 
     //run the bus factor calculation
     let _run_busfactor = Command::new("./target/debug/calculate_bus_factor")
-        .arg(&cli_input[2])
+        .arg(&url)
         .status()
         .expect("Err"); //runs the rust executable "calculate_BusFactor" with the CLI input file
 
@@ -52,7 +85,7 @@ fn main() {
 
     //run the updated code score calculation
     let _run_updated_code = Command::new("./target/debug/calculate_updated_code")
-        .arg(&cli_input[2])
+        .arg(&url)
         .status()
         .expect("Err"); //runs the rust executable "calculate_UpdatedCode" with the CLI input file
 
@@ -63,7 +96,7 @@ fn main() {
 
     //run the good pinning practice score calculation
     let _run_pinning_practice = Command::new("./target/debug/calculate_pinning_practice")
-        .arg(&cli_input[2])
+        .arg(&url)
         .status()
         .expect("Err"); //runs the rust executable "calculate_pinning_practice" with the CLI input file
     
@@ -73,7 +106,7 @@ fn main() {
     }
     
     //run the correctness calculation (calculate_Correctness)
-    let _run_correctness = Command::new("python3").arg("graphql_api/calculate_Correctness.py").arg(&cli_input[2]).status().expect("Err");
+    let _run_correctness = Command::new("python3").arg("graphql_api/calculate_Correctness.py").arg(&url).status().expect("Err");
 
     //if the correctness script didnt return success, exit 1 and print error
     if _run_correctness.success() == false {
@@ -84,7 +117,7 @@ fn main() {
     //run the responsive maintainer calculation (calculate_ResponsiveMaintainer.py)
     let _run_responsivemaintainer = Command::new("python3")
         .arg("rest_api/calculate_ResponsiveMaintainer.py")
-        .arg(&cli_input[2])
+        .arg(&url)
         .status()
         .expect("Err");
 
@@ -97,7 +130,7 @@ fn main() {
     //run the license calculation (license.py)
     let _run_license = Command::new("python3")
         .arg("local_cloning/license.py")
-        .arg(&cli_input[2])
+        .arg(&url)
         .status()
         .expect("Err");
 
@@ -110,17 +143,16 @@ fn main() {
     //do logging
     let _set_logs = Command::new("python3")
         .arg("verbosity.py")
-        .arg(&cli_input[2])
+        .arg(&url)
         .status()
         .expect("Err");
 
     //Print results and clean files on -p, save results and not print on -s
-    if flag == "-p" {
-
+    if flag == "-p" || flag == "-u" {
         //print the results (print_results.py)
         let _print_results = Command::new("python3")
             .arg("output/print_results.py")
-            .arg(&cli_input[2])
+            .arg(&url)
             .status()
             .expect("Err");
 
@@ -136,7 +168,8 @@ fn main() {
             std::process::exit(1);
         }
 
-
+        //this will remove output files and locally cloned repos
+        clean_up();
     }
 
     //exit 0 on success
@@ -207,13 +240,11 @@ fn clean_up() {
         };
     }
 
-    if Path::new("output/resp_maintain_out.txt").exists(){
-        let _clean_respmain = match fs::remove_file("output/resp_maintain_out.txt") {
-            Ok(_clean_respmain) => _clean_respmain,
-            Err(..) => {
-                println!("Error cleaning responsive maintainer output!\n");
-                std::process::exit(1);
-            }
-        };
-    }
+    let _clean_respmain = match fs::remove_file("output/resp_maintain_out.txt") {
+        Ok(_clean_respmain) => _clean_respmain,
+        Err(..) => {
+            println!("Error cleaning responsive maintainer output!\n");
+            std::process::exit(1);
+        }
+    };
 }

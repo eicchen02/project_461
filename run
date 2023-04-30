@@ -6,6 +6,7 @@ if [ "$1" == 'install' ]; then
     pip3 install requests
     pip3 install flask
     pip3 install "cloud-sql-python-connector[pymysql]"
+    pip3 install connexion[swagger-ui]
     python3 -m pip install PyMySQL
     pip install SQLAlchemy
     echo "Install Complete!"
@@ -28,6 +29,8 @@ elif [ "$1" == 'score' ]; then
     ./target/debug/main "$@" -s;
 elif [ "$1" == 'showscore' ]; then
     ./target/debug/main "$@" -p;
+elif [ "$1" == 'upload' ]; then
+    ./target/debug/main "$@" -u;
 else
     echo "Invalid Input";
     exit 5

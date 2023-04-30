@@ -18,19 +18,7 @@ fn main(){
     let cli_input: Vec<String> = env::args().collect(); 
 
     //create a variable for the file path and save the first command line argument into it
-    let filepath = &cli_input[1]; 
-
-    //take the contents of the file and save into a single string
-    let data = match fs::read_to_string(filepath){
-        Ok(data) => data,
-        Err(..) => {
-            println!("Error reading the input file!\n");
-            std::process::exit(1);
-        }
-    };
-    
-    //now, chop this string into a vector at every newline since the URLS are newline delimited
-    let _urls: Vec<&str> = data.split('\n').collect();
+    let url = &cli_input[1]; 
 
     //if the logfiles exist from a previous run, delete them
     let is_logv1 = Path::new("log/logv1.txt").exists();
@@ -63,15 +51,14 @@ fn main(){
 
     let mut output_text = BufWriter::new(File::create("output/pinningpractice_out.txt").expect("Error opening output for pinning practice metric."));
 
-    for url in _urls {
-        let pinningpractice_inst = Command::new("python3").arg("rest_api/versionpinning.py").arg(url).output().expect("Err");
-        write!(log2, "\nFraction of dependencies pinned to a major and minor version for url {}: {:?}\n", url, pinningpractice_inst.stdout).expect("Error writing to log");
+    let pinningpractice_inst = Command::new("python3").arg("rest_api/versionpinning.py").arg(url).output().expect("Err");
+    write!(log2, "\nFraction of dependencies pinned to a major and minor version for url {}: {:?}\n", url, pinningpractice_inst.stdout).expect("Error writing to log");
     
-        let mut pinningpractice_str = String::from_utf8(pinningpractice_inst.stdout).unwrap();
-        pinningpractice_str.pop();
-        let version_pinning_full : f64 = pinningpractice_str.parse().unwrap();
+    let mut pinningpractice_str = String::from_utf8(pinningpractice_inst.stdout).unwrap();
+    pinningpractice_str.pop();
+    let version_pinning_full : f64 = pinningpractice_str.parse().unwrap();
 
-        write!(log2, "Good Pinning Practice score for url {}: {:.2}\n\n", url, version_pinning_full).expect("Error writing to log");
-        write!(output_text, "{0}\n", version_pinning_full).expect("Error writing version pinning score to output");
-    }
+    write!(log2, "Good Pinning Practice score for url {}: {:.2}\n\n", url, version_pinning_full).expect("Error writing to log");
+    write!(output_text, "{0}\n", version_pinning_full).expect("Error writing version pinning score to output");
+
 }
