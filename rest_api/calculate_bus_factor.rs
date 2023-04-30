@@ -31,19 +31,7 @@ fn main(){
     let cli_input: Vec<String> = env::args().collect(); 
 
     //create a variable for the file path and save the first command line argument into it
-    let filepath = &cli_input[1]; 
-
-    //take the contents of the file and save into a single string
-    let data = match fs::read_to_string(filepath){
-        Ok(data) => data,
-        Err(..) => {
-            println!("Error reading the input file!\n");
-            std::process::exit(1);
-        }
-    };
-    
-    //now, chop this string into a vector at every newline since the URLS are newline delimited
-    let mut _urls: Vec<&str> = data.split('\n').collect();
+    let url = &cli_input[1]; 
 
     //if the logfiles exist from a previous run, delete them
     let is_logv1 = Path::new("log/logv1.txt").exists();
@@ -79,13 +67,12 @@ fn main(){
 
 
     //Call information with rest_api functions for each url
-    for url in _urls {
-        let numcommits = Command::new("python3").arg("rest_api/totalCommits.py").arg(url).output().expect("Err");
-        write!(log2, "\nNumber of commits for url {}: {:?}\n", url, numcommits.stdout).expect("Error writing to log");
-        let numcontributors = Command::new("python3").arg("rest_api/totalContributors.py").arg(url).output().expect("Err");
-        write!(log2, "\nNumber of contributors for url {}: {:?}\n", url, numcontributors.stdout).expect("Error writing to log");
-        let numfiles = Command::new("python3").arg("rest_api/totalFiles.py").arg(url).output().expect("Err");
-        write!(log2, "\nNumber of files for url {}: {:?}\n", url, numfiles.stdout).expect("Error writing to log");
+    let numcommits = Command::new("python3").arg("rest_api/totalCommits.py").arg(url).output().expect("Err");
+    write!(log2, "\nNumber of commits for url {}: {:?}\n", url, numcommits.stdout).expect("Error writing to log");
+    let numcontributors = Command::new("python3").arg("rest_api/totalContributors.py").arg(url).output().expect("Err");
+    write!(log2, "\nNumber of contributors for url {}: {:?}\n", url, numcontributors.stdout).expect("Error writing to log");
+    let numfiles = Command::new("python3").arg("rest_api/totalFiles.py").arg(url).output().expect("Err");
+    write!(log2, "\nNumber of files for url {}: {:?}\n", url, numfiles.stdout).expect("Error writing to log");
 
 	let mut num_commits = String::from_utf8(numcommits.stdout).unwrap();
 	num_commits.pop();
@@ -96,8 +83,7 @@ fn main(){
 	let mut num_files = String::from_utf8(numfiles.stdout).unwrap();
 	num_files.pop();
 
-        let contributor_score = calculate_busfactor(num_commits.parse().unwrap(), num_contributors.parse().unwrap(), num_files.parse().unwrap());
-        write!(log2, "BusFactor score for url {}: {:.2}\n\n", url, contributor_score).expect("Error writing to log");
-        write!(out_file, "{0}\n", contributor_score).expect("Error writing busfactor to output");
-    }
+    let contributor_score = calculate_busfactor(num_commits.parse().unwrap(), num_contributors.parse().unwrap(), num_files.parse().unwrap());
+    write!(log2, "BusFactor score for url {}: {:.2}\n\n", url, contributor_score).expect("Error writing to log");
+    write!(out_file, "{0}\n", contributor_score).expect("Error writing busfactor to output");
 }

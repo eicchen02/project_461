@@ -257,7 +257,7 @@ paths:
   "/authenticate":
     put:
       description: Create an access token.
-      operationId: CreateAuthToken
+      operationId: app.CreateAuthToken
       consumes:
         - application/json
       produces:
@@ -294,7 +294,7 @@ paths:
     post:
       consumes:
         - application/json
-      operationId: PackageCreate
+      operationId: app.PackageCreate
       parameters:
         - in: body
           name: body
@@ -318,7 +318,7 @@ paths:
           description: Package is not uploaded due to the disqualified rating.
   "/package/byName/{name}":
     delete:
-      operationId: PackageByNameDelete
+      operationId: app.PackageByNameDelete
       parameters:
         - description: |-
             Name of a package.
@@ -342,7 +342,7 @@ paths:
       summary: Delete all versions of this package.
     get:
       description: Return the history of this package (all versions).
-      operationId: PackageByNameGet
+      operationId: app.PackageByNameGet
       parameters:
         - description: >-
             The spec permits you to use any token format you like. You could,
@@ -406,7 +406,7 @@ paths:
       description: >-
         Search for a package using regular expression over package names and
         READMEs. This is similar to search by name.
-      operationId: PackageByRegExGet
+      operationId: app.PackageByRegExGet
       parameters:
         - in: body
           name: body
@@ -431,7 +431,7 @@ paths:
       summary: Get any packages fitting the regular expression.
   "/package/{id}":
     delete:
-      operationId: PackageDelete
+      operationId: app.PackageDelete
       parameters:
         - description: Package ID
           in: path
@@ -450,7 +450,7 @@ paths:
       summary: Delete this version of the package.
     get:
       description: Return this package.
-      operationId: PackageRetrieve
+      operationId: app.PackageRetrieve
       parameters:
         - description: ID of package to fetch
           in: path
@@ -499,7 +499,7 @@ paths:
 
         The package contents (from PackageData) will replace the previous
         contents.
-      operationId: PackageUpdate
+      operationId: app.PackageUpdate
       parameters:
         - description: ''
           in: path
@@ -528,7 +528,7 @@ paths:
       summary: Update this content of the package.
   "/package/{id}/rate":
     get:
-      operationId: PackageRate
+      operationId: app.PackageRate
       parameters: []
       produces:
         - application/json
@@ -588,7 +588,7 @@ paths:
 
         The response is paginated; the response header includes the offset to
         use in the next query.
-      operationId: PackagesList
+      operationId: app.PackagesList
       parameters:
         - description: >-
             Provide this for pagination. If not provided, returns the first page
@@ -630,7 +630,7 @@ paths:
   "/reset":
     delete:
       description: Reset the registry to a system default state.
-      operationId: RegistryReset
+      operationId: app.RegistryReset
       parameters: []
       responses:
         200:
@@ -663,5 +663,4 @@ securityDefinitions:
     type: apiKey
 swagger: '2.0'
 x-components: {}
-
 

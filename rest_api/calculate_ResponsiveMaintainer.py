@@ -132,59 +132,51 @@ def getResponsiveScore(githubRepoURL):
         return -1
 
 
-def getGithubURLs(repos):
+def getGithubURLs(repo):
 
-    repositories = []
-    for x in range(len(repos)):  # extract owner and name of each repository
-        repoName = repos[x].partition("github.com/")[2]  # extract "owner/repo"
+    names = []
+    repoName = repo.partition("github.com/")[2]  # extract "owner/repo"
 
-        if not repoName:  # if github.com/ is not found, extract as npmjs package
-            url = os.path.basename(repos[x].strip("\n"))
-            with open(f"local_cloning/cloned_repos/{url}/package.json") as json_File:
-                npmsRepo = json.load(json_File)  # load json file containing repo info
-                repoName = npmsRepo["repository"]  # extract repo info
+    if not repoName:  # if github.com/ is not found, extract as npmjs package
+        url = os.path.basename(repo.strip("\n"))
+        with open(f"local_cloning/cloned_repos/{url}/package.json") as json_File:
+            npmsRepo = json.load(json_File)  # load json file containing repo info
+            repoName = npmsRepo["repository"]  # extract repo info
 
-            if not isinstance(repoName, str):  # if a dict is returned instead of str
-                repoName = list(repoName.values())[1]  # extract url from dict
-                repoName = repoName.partition("github.com/")[2].replace(
-                    ".git", ""
-                )  # extract "owner/repo"
+        if not isinstance(repoName, str):  # if a dict is returned instead of str
+            repoName = list(repoName.values())[1]  # extract url from dict
+            repoName = repoName.partition("github.com/")[2].replace(
+                ".git", ""
+            )  # extract "owner/repo"
 
-        repositories.append(
-            (repoName.partition("/")[0],repoName.partition("/")[2].replace("\n",""))
-        )  # append (owner, repo)
+    names.append(
+        (repoName.partition("/")[0],repoName.partition("/")[2].replace("\n",""))
+    )  # append (owner, repo)
 
     # convert all repos to github urls
-    gitLinks = []
 
-    for r in repositories:
+    for r in names:
         currLink = "https://github.com/" + r[0] + "/" + r[1]
-        gitLinks.append(currLink)
+        gitLink = currLink
 
     # return list of github urls
-    return gitLinks
+    return gitLink
 
 
 def main():
 
     # read in data from test file
-    testFile = open(sys.argv[1], "r")
-    urls = testFile.readlines()
-
-    # clear newlines from all urls
-    for u in range(len(urls)):
-        urls[u] = urls[u].replace("\n", "")
+    url = sys.argv[1]
 
     # convert any npm repos to github
-    gitURLs = getGithubURLs(urls)
+    gitURL = getGithubURLs(url)
 
     # find and print the responsive maintainer metric for each repo
     with open("output/resp_maintain_out.txt", "w") as f:
-        for u in gitURLs:
-            currScore = getResponsiveScore(u)
-            # print('\nResponsive Maintainer score for repo: ', u, '\nis: ',currScore,'\n')
-            f.write(str(currScore))
-            f.write("\n")
+        currScore = getResponsiveScore(gitURL)
+        # print('\nResponsive Maintainer score for repo: ', u, '\nis: ',currScore,'\n')
+        f.write(str(currScore))
+        f.write("\n")
 
 
 if __name__ == "__main__":

@@ -42,7 +42,7 @@ def main():
 
     github_token = os.environ.get("GITHUB_TOKEN")
     names = (gitURL.split("github.com/", 1)[1]).split("/")
-
+    
     headers = {"Authorization": f"Bearer {github_token}"}
 
     query = """
@@ -75,15 +75,26 @@ def main():
             newCode = 0
             totalCommits = 0
             for pull in response.json()["data"]["repository"]["pullRequests"]["nodes"]:
-                newCode += pull["additions"]
+                try:
+                    newCode += pull["additions"]
+                except:
+                    newCode += 0
             for commit in response.json()["data"]["repository"]["commitComments"][
 		    "nodes"
 	    ]:
-                totalCommits += commit["commit"]["additions"]
+                try:
+                  totalCommits += commit["commit"]["additions"]
+                except:
+                  totalCommits += 0
         except:
             newCode = 0
             totalCommits = 1
-        print(f"{round(newCode/(newCode + totalCommits), 2)}")
+        if(newCode == 0 and totalCommits == 0):
+              print("0.0")
+        else:
+          print(f"{round(newCode/(newCode + totalCommits), 2)}")
+    else:
+        print("0.0")
 
 
 if __name__ == "__main__":

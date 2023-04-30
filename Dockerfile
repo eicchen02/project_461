@@ -29,4 +29,5 @@ ENV GITHUB_TOKEN=${GITHUB_TOKEN}
 RUN ./run build
 
 
-CMD ./run showscore ShortSample.txt
+# CMD ./run showscore ShortSample.txt
+CMD python3 app.py
