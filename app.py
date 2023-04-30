@@ -10,15 +10,22 @@ import connexion
 id_counter = 0
 application = connexion.FlaskApp(__name__, specification_dir='Rest_API_File/')
 app = application.app
+app.secret_key = 'testSecretKey'
 
 #* Frontend Page navigation
 
-#? This is the homepage for the website
+#* These routes are used for navigation from one frontend page to another.
+#* The operations (rate/upload/update/download) also have a page with
+#* a form, which performs the operations on the inputted value and returns
+#* another Frontend Completion Page
+
+#? This is the homepage for the website.
 @app.route('/')
 def home():
     return render_template('Home.html')
 
-#? This is the page which lists all database commands.
+#? This is the page which lists all database 
+#? commands.
 @app.route('/database/')
 def database():
     return render_template('Database.html')
@@ -29,11 +36,15 @@ def database():
 def packageList():
     return render_template('PackageList.html')
 
-#? This is the upload frontend page. Takes a package URL and uploads to the SQL database
+#? This is the upload frontend page. Takes a
+#? package URL and uploads to the SQL database.
 @app.route('/database/upload', methods=["GET", "POST"])
 def upload():
     #* If the submit button is pressed (A "POST" Operation)
     if (request.method == "POST"):
+        #* Sets the default status to be an error
+        session['upload_status'] = "Error with Uploading"
+        
         #* Obtaines the global id_counter var for identification
         global id_counter
         
@@ -42,8 +53,8 @@ def upload():
         
         #* Checks to make sure that the input is a GitHub or NPM link
         if("github.com" not in package_url and "npmjs.com" not in package_url):
-            return jsonify({'status_code': '400',
-                            'message': 'Package is not uploaded due to an invalid URL link.'}), 400, {'content_type': 'application/json'}
+            session['upload_status_details'] = "Package is not uploaded due to an invalid URL link"
+            return redirect(url_for('uploadComplete'))
         
         #* Check if the current URL already is uploaded
         #! Need SQL interaction. Return error if already in database
@@ -76,8 +87,8 @@ def upload():
             or pinningPractice < 0.5 or correctness < 0.5
             or busFactor < 0.5 or responsiveness < 0.5
             or license < 0.5):
-            return jsonify({'status_code': '424',
-                            'message': 'Package is not uploaded due to the disqualified rating.'}), 424, {'content_type': 'application/json'}
+            session['upload_status_details'] = "Package is not uploaded due to a disqualified rating.\nEvery metric must score greater than 0.5"
+            return redirect(url_for('uploadComplete'))
 
         #* Remove unneeded files
         remove("output/output.json")
@@ -86,23 +97,30 @@ def upload():
         #! Then, upload to SQL database
         
         #* Return success page
-        #TODO Needs a success page
+        session['upload_status'] = "Package has been Uploaded"
+        session['upload_status_details'] = "The given package has been uploaded to our database!"
+        return redirect(url_for('uploadComplete'))
     else:
         #* Otherwise, just return the Upload page (A "GET" Operation)
         return render_template('interactions/Upload.html')
 
-#? This is the update frontend page. Takes a URL and updates the current entry in the SQL database with most recent values
+#? This is the update frontend page. Takes a URL and 
+#? updates the current entry in the SQL database with 
+#? most recent values.
 @app.route('/database/update/', methods=["GET", "POST"])
 def update():
     #* If the submit button is pressed (A "POST" Operation)
     if (request.method == "POST"):
+        #* Sets default status message to be an error
+        session['update_status'] = "Error with Updating"
+        
         #* Grabs the package URL from the update form
         package_url = request.form["update_input"]
         
         #* Checks to make sure that the input is a GitHub or NPM link
         if("github.com" not in package_url and "npmjs.com" not in package_url):
-            return jsonify({'status_code': '400',
-                            'message': 'Package is not uploaded due to an invalid URL link.'}), 400, {'content_type': 'application/json'}
+            session['update_status_details'] = "Package is not updated due to an invalid URL link"
+            return redirect(url_for('updateComplete'))
         
         #* Search through the SQL database in order to find the corresponding URL exists already
         #! Need SQL interaction. Return error page if failed
@@ -126,30 +144,31 @@ def update():
         busFactor = output["BUS_FACTOR_SCORE"]
         responsiveness = output["RESPONSIVE_MAINTAINER_SCORE"]
         license = output["LICENSE_SCORE"]
-        
-        #* Performs Ingestion on the package
-        if (netScore < 0.5 or rampup < 0.5 or updatedCode < 0.5
-            or pinningPractice < 0.5 or correctness < 0.5
-            or busFactor < 0.5 or responsiveness < 0.5
-            or license < 0.5):
-            return jsonify({'status_code': '424',
-                            'message': 'Package is not uploaded due to the disqualified rating.'}), 424, {'content_type': 'application/json'}
 
         #* Remove unneeded files
         remove("output/output.json")
         remove("temp_file.txt")
         
+        #* Update SQL database with new values
+        #! Need SQL interaction. Return error page on failure
+        
         #* Show success page on success
-        #TODO Needs a success page
+        session['update_status'] = "Package has been Updated"
+        session['update_status_details'] = "The given package has been updated in our database!"
+        return redirect(url_for('updateComplete'))
     else:
         #* Otherwise, just return the Update page (A "GET" Operation)
         return render_template('/interactions/Update.html')
 
-#? This is the rate frontend page. Takes a URL and displays the ratings for such page
+#? This is the rate frontend page. Takes a URL and 
+#? displays the ratings for such page.
 @app.route('/database/rate/', methods=["GET", "POST"])
 def rate():
     #* If the submit button is pressed (A "POST" Operation)
     if (request.method == "POST"):
+        #* Sets the default status to be an error
+        session['rate_status'] = "Error with Rating"
+        
         #* Grabs the package URL from the rate form
         package_url = request.form["rate_input"]
         
@@ -160,16 +179,23 @@ def rate():
         #! Need SQL interaction. Return error page if failed
         
         #* Return rating page that shows all scores according to the data gathered
-        #TODO Needs a scoring page to show all scores associated with package URL/name.
+        #TODO Change the session 'status_details' to be the values obtained from SQL database
+        session['rate_status'] = "Package has been Rated"
+        session['rate_status_details'] = "Here are the values for the given package!"
+        return redirect(url_for('rateComplete'))
     else:
         #* Otherwise, just return the Rate page (A "GET" Operation)
         return render_template('interactions/Rate.html')
 
-#? This is the download frontend page. Takes a URL and downloads a local copy for the user
+#? This is the download frontend page. Takes a URL 
+#? and downloads a local copy for the user.
 @app.route('/database/download/', methods=["GET", "POST"])
 def download():
     #* If the submit button is pressed (A "POST" Operation)
     if (request.method == "POST"):
+        #* Sets the default status to be an error
+        session['download_status'] = "Error with Downloading"
+        
         #* Grabs the package URL from the download form
         package_url = request.form["download_input"]
         
@@ -182,13 +208,56 @@ def download():
         #* Use this format to send the file back -> return send_file(io.BytesIO(FILE_DATA))
         #! Need SQL interaction. Return error page if failed
         
-        #TODO Potentially show success page, in addition to the returned file. May not be possible.
+        #* Show success page on success
+        session['download_status'] = "Package has been Downloaded"
+        session['download_status_details'] = "The given package has been downloaded from our database!"
+        return redirect(url_for('downloadComplete'))
     else:
         #* Otherwise, just return the Download page (A "GET" Operation)
         return render_template('/interactions/Download.html')
 
+#* Frontend Completion Pages:
 
-#* Backend paths and operations
+#* These Pages are used to show results or to inform the user of a success/fail for
+#* all operations through the frontend website.
+
+#? The page for displaying completion/errors for uploads.
+@app.route('/database/upload/complete', methods=["GET"])
+def uploadComplete():
+    #* Returns the upload completion page, for both errors and success
+    return render_template('interactions/complete/UploadComplete.html',
+                           status_message=session['upload_status'],
+                           status_message_details=session['upload_status_details'])
+
+#? The page for displaying completion/errors for updates.
+@app.route('/database/update/complete', methods=["GET"])
+def updateComplete():
+    #* Returns the update completion page, for both errors and success
+    return render_template('interactions/complete/UpdateComplete.html', 
+                           status_message=session['update_status'],
+                           status_message_details=session['update_status_details'])
+
+#? The page for displaying completion/errors for ratings.
+@app.route('/database/rate/complete', methods=["GET"])
+def rateComplete():
+    return render_template('interactions/complete/RateComplete.html',
+                           status_message=session['rate_status'],
+                           status_message_details=session['rate_status_details'])
+
+#? The page for displaying completion/errors for downloads.
+@app.route('/database/download/complete', methods=["GET"])
+def downloadComplete():
+    return render_template('interactions/complete/DownloadComplete.html',
+                           status_message=session['download_status'],
+                           status_message_details=session['download_status_details'])
+
+
+#* Backend Paths and Operations:
+
+#* These routes are used to handle all REST API calls and operations.
+#* Some of these routes are similar to the Frontend Page Operations,
+#* but most operate differently and return JSON responses back to the
+#* user.
 
 #? We have no authentication, should return 501
 #TODO May have to include tokens anyways? Maybe not users, but potentially tokens for operations. May not be baseline though.
@@ -197,7 +266,8 @@ def CreateAuthToken():
     return jsonify({'status_code': '501',
                     'message': 'This system does not support authentication'}), 501, {'content_type': 'application/json'}
 
-#? Uploads a new package to our database
+#? Uploads a new package to our database. This operates similarly to
+#? the "Upload" Frontend Page Operation.
 @app.route('/package', methods=["POST"])
 def PackageCreate():
     #* Grabs the global id_counter for adding packages
@@ -270,7 +340,9 @@ def PackageCreate():
                     'data': f'{packageData}',
                     'metadata': f'{metadata}'}), 201, {'content_type': 'application/json'}
 
-#? This will delete packages from SQL database by the name provided
+
+#? This will delete packages from SQL database 
+#? by the name provided.
 #! Needs SQL interaction
 @app.route('/package/byName/{name}', methods=["DELETE"])
 def PackageByNameDelete(name=None):
@@ -289,7 +361,8 @@ def PackageByNameDelete(name=None):
     return jsonify({'status_code': '200',
                     'message': 'Package is deleted'}), 200, {'content_type': 'application/json'}
 
-#? This will obtain the most recent change to the package (date of last modification)
+#? This will obtain the most recent change to the 
+#? package (date of last modification).
 #! Needs SQL interaction, as well as additional table entry for 'time last modified'
 @app.route('/package/byName/{name}', methods=["GET"])
 def PackageByNameGet(name=None):
@@ -315,7 +388,8 @@ def PackageByNameGet(name=None):
     return jsonify({'status_code': '200',
                     'message': 'This is a test, must implement later'}), 200, {'content_type': 'application/json'}
 
-#? This uses the search function that we have created to search for a list of Package types
+#? This uses the search function that we have created to search
+#? for a list of Package types.
 #! Needs SQL interaction
 @app.route('/package/byRegEx', methods=["POST"])
 def PackageByRegExGet():
@@ -339,7 +413,7 @@ def PackageByRegExGet():
     return jsonify({'status_code': '200',
                     'message': 'This is a test, must implement later'}), 200, {'content_type': 'application/json'}
 
-#? This deletes packages based on the id provided
+#? This deletes packages based on the id provided.
 #! Needs SQL interaction
 @app.route('/package/{id}', methods=["DELETE"])
 def PackageDelete(id=None):
@@ -358,7 +432,8 @@ def PackageDelete(id=None):
     return jsonify({'status_code': '200',
                     'message': 'Package is deleted'}), 200, {'content_type': 'application/json'}
 
-#? This retrieves a base64 package from the database
+#? This retrieves a base64 package from the database. This 
+#? operates similarly to the 'Download" Frontend Page Operation.
 #! Needs SQL interaction
 @app.route('/package/{id}', methods=["GET"])
 def PackageRetrieve(id=None):
@@ -380,7 +455,8 @@ def PackageRetrieve(id=None):
     return jsonify({'code': '200',
                     'message': 'This is a test, must implement later'}), 200, {'content_type': 'application/json'}
 
-#? This will replace the current ID with a new package version (update), as long as ID, version, and name match
+#? This will replace the current ID with a new package 
+#? version (update), as long as ID, version, and name match.
 #! Needs SQL interaction
 @app.route('/package/{id}', methods=["PUT"])
 def PackageUpdate(id=None):
@@ -415,7 +491,8 @@ def PackageUpdate(id=None):
     return jsonify({'status_code': '200',
                     'message': 'Version is updated'}), 200, {'content_type': 'application/json'}
 
-#? This is the rating function for a package's id value
+#? This is the rating function for a package's id value. This
+#? operates similarly to the "Rate" Frontend Page Operation.
 #! Needs SQL interaction
 @app.route('/package/{id}/rate', methods=["GET"])
 def PackageRate(id=None):
@@ -436,13 +513,15 @@ def PackageRate(id=None):
                     'rate': 'This is a test, put values here when completed'}), 200, {'content_type': 'application/json'}
 
 #? This is the fetch command. Need to understand it more
+#? before implementing it.
 #! No idea how to do this currently, must examine later
 @app.route('/packages', methods=["POST"])
 def PackagesList():
     return jsonify({'status_code': '200',
                     'message': 'This is a test, must implement later'}), 200, {'content_type': 'application/json'}
 
-#? This is the SQL reset
+#? This is the SQL reset. Resets the SQL database to a 
+#? default state.
 #! Need a working SQL database in order to complete this
 @app.route('/reset', methods=["DELETE"])
 def RegistryReset():
