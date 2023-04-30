@@ -10,7 +10,7 @@ import connexion
 id_counter = 0
 application = connexion.FlaskApp(__name__, specification_dir='Rest_API_File/')
 app = application.app
-app.secret_key = 'testSecretKey'
+app.secret_key = os.urandom(24)
 
 #* Frontend Page navigation
 
