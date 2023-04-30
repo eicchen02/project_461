@@ -29,29 +29,164 @@ def database():
 def packageList():
     return render_template('PackageList.html')
 
-#? This is the upload page
-#TODO Must use backend services to complete upload. May be able to use calls further below to accomplish this
-@app.route('/database/upload')
+#? This is the upload frontend page. Takes a package URL and uploads to the SQL database
+@app.route('/database/upload', methods=["GET", "POST"])
 def upload():
-    return render_template('interactions/Upload.html')
+    #* If the submit button is pressed (A "POST" Operation)
+    if (request.method == "POST"):
+        #* Obtaines the global id_counter var for identification
+        global id_counter
+        
+        #* Grabs the package URL from the upload form
+        package_url = request.form["upload_input"]
+        
+        #* Checks to make sure that the input is a GitHub or NPM link
+        if("github.com" not in package_url and "npmjs.com" not in package_url):
+            return jsonify({'status_code': '400',
+                            'message': 'Package is not uploaded due to an invalid URL link.'}), 400, {'content_type': 'application/json'}
+        
+        #* Check if the current URL already is uploaded
+        #! Need SQL interaction. Return error if already in database
+        
+        #* Open the temp_file for writing the data to
+        f = open("temp_file.txt", "w+")
+        f.write(package_url)
+        f.close()
 
-#? This is the update page
-#TODO Must use backend services to complete update. May be able to use calls further below to accomplish this
-@app.route('/database/update/')
+        #* Runs the upload function from ./run, which calculates scoring
+        subprocess.run(["./run", "upload", "temp_file.txt"])
+        sleep(2)
+
+        #* Grabs the URL and scores from the output json
+        output = load(open("output/output.json"))[0]
+        netScore = output["NET_SCORE"]
+        rampup = output["RAMP_UP_SCORE"]
+        updatedCode = output["UPDATED_CODE_SCORE"]
+        pinningPractice = output["PINNING_PRACTICE_SCORE"]
+        correctness = output["CORRECTNESS_SCORE"]
+        busFactor = output["BUS_FACTOR_SCORE"]
+        responsiveness = output["RESPONSIVE_MAINTAINER_SCORE"]
+        license = output["LICENSE_SCORE"]
+
+        #* Increment id_counter
+        id_counter += 1
+
+        #* Performs Ingestion on the package
+        if (netScore < 0.5 or rampup < 0.5 or updatedCode < 0.5
+            or pinningPractice < 0.5 or correctness < 0.5
+            or busFactor < 0.5 or responsiveness < 0.5
+            or license < 0.5):
+            return jsonify({'status_code': '424',
+                            'message': 'Package is not uploaded due to the disqualified rating.'}), 424, {'content_type': 'application/json'}
+
+        #* Remove unneeded files
+        remove("output/output.json")
+        remove("temp_file.txt")
+        
+        #! Then, upload to SQL database
+        
+        #* Return success page
+        #TODO Needs a success page
+    else:
+        #* Otherwise, just return the Upload page (A "GET" Operation)
+        return render_template('interactions/Upload.html')
+
+#? This is the update frontend page. Takes a URL and updates the current entry in the SQL database with most recent values
+@app.route('/database/update/', methods=["GET", "POST"])
 def update():
-    return render_template('/interactions/Update.html')
+    #* If the submit button is pressed (A "POST" Operation)
+    if (request.method == "POST"):
+        #* Grabs the package URL from the update form
+        package_url = request.form["update_input"]
+        
+        #* Checks to make sure that the input is a GitHub or NPM link
+        if("github.com" not in package_url and "npmjs.com" not in package_url):
+            return jsonify({'status_code': '400',
+                            'message': 'Package is not uploaded due to an invalid URL link.'}), 400, {'content_type': 'application/json'}
+        
+        #* Search through the SQL database in order to find the corresponding URL exists already
+        #! Need SQL interaction. Return error page if failed
+        
+        #* Open the temp_file for writing the data to
+        f = open("temp_file.txt", "w+")
+        f.write(package_url)
+        f.close()
 
-#? This is the rate page
-#TODO Must use backend services to complete rate. May be able to use calls further below to accomplish this
-@app.route('/database/rate/')
+        #* Runs the upload function from ./run, which calculates scoring
+        subprocess.run(["./run", "upload", "temp_file.txt"])
+        sleep(2)
+
+        #* Grabs the URL and scores from the output json
+        output = load(open("output/output.json"))[0]
+        netScore = output["NET_SCORE"]
+        rampup = output["RAMP_UP_SCORE"]
+        updatedCode = output["UPDATED_CODE_SCORE"]
+        pinningPractice = output["PINNING_PRACTICE_SCORE"]
+        correctness = output["CORRECTNESS_SCORE"]
+        busFactor = output["BUS_FACTOR_SCORE"]
+        responsiveness = output["RESPONSIVE_MAINTAINER_SCORE"]
+        license = output["LICENSE_SCORE"]
+        
+        #* Performs Ingestion on the package
+        if (netScore < 0.5 or rampup < 0.5 or updatedCode < 0.5
+            or pinningPractice < 0.5 or correctness < 0.5
+            or busFactor < 0.5 or responsiveness < 0.5
+            or license < 0.5):
+            return jsonify({'status_code': '424',
+                            'message': 'Package is not uploaded due to the disqualified rating.'}), 424, {'content_type': 'application/json'}
+
+        #* Remove unneeded files
+        remove("output/output.json")
+        remove("temp_file.txt")
+        
+        #* Show success page on success
+        #TODO Needs a success page
+    else:
+        #* Otherwise, just return the Update page (A "GET" Operation)
+        return render_template('/interactions/Update.html')
+
+#? This is the rate frontend page. Takes a URL and displays the ratings for such page
+@app.route('/database/rate/', methods=["GET", "POST"])
 def rate():
-    return render_template('interactions/Rate.html')
+    #* If the submit button is pressed (A "POST" Operation)
+    if (request.method == "POST"):
+        #* Grabs the package URL from the rate form
+        package_url = request.form["rate_input"]
+        
+        #* Search through the SQL database in order to find the corresponding URL
+        #! Need SQL interaction. Return error page if failed
+        
+        #* Grab all scores from the SQL database
+        #! Need SQL interaction. Return error page if failed
+        
+        #* Return rating page that shows all scores according to the data gathered
+        #TODO Needs a scoring page to show all scores associated with package URL/name.
+    else:
+        #* Otherwise, just return the Rate page (A "GET" Operation)
+        return render_template('interactions/Rate.html')
 
-#? This is the download page
-#TODO Must use backend services to complete download. May be able to use calls further below to accomplish this
-@app.route('/database/download/')
+#? This is the download frontend page. Takes a URL and downloads a local copy for the user
+@app.route('/database/download/', methods=["GET", "POST"])
 def download():
-    return render_template('/interactions/Download.html')
+    #* If the submit button is pressed (A "POST" Operation)
+    if (request.method == "POST"):
+        #* Grabs the package URL from the download form
+        package_url = request.form["download_input"]
+        
+        #* Search through the SQL database in order to find the corresponding URL
+        #! Need SQL interaction. Return error page if failed
+        
+        #* Grab the base64 package associated from the SQL database
+        #! Need SQL interaction. Return error page if failed
+        
+        #* Use this format to send the file back -> return send_file(io.BytesIO(FILE_DATA))
+        #! Need SQL interaction. Return error page if failed
+        
+        #TODO Potentially show success page, in addition to the returned file. May not be possible.
+    else:
+        #* Otherwise, just return the Download page (A "GET" Operation)
+        return render_template('/interactions/Download.html')
+
 
 #* Backend paths and operations
 
@@ -99,6 +234,9 @@ def PackageCreate():
     responsiveness = output["RESPONSIVE_MAINTAINER_SCORE"]
     license = output["LICENSE_SCORE"]
     
+    #* Increment id_counter
+    id_counter += 1
+    
     #* Performs Ingestion on the package
     if (netScore < 0.5 or rampup < 0.5 or updatedCode < 0.5
         or pinningPractice < 0.5 or correctness < 0.5
@@ -111,8 +249,8 @@ def PackageCreate():
     remove("output/output.json")
     remove("temp_file.txt")
 
-    #! Still needs to check if already in database and return error code 409 if it already exists
-    #! Still needs to upload to database after previous checks
+    #! Still needs to check if already in database and return error code 409 if it already exists (DO THIS HERE)
+    #! Still needs to upload to database after previous checks (DO THIS HERE)
     
     #* Grab version number from package
     version = load(open(f'local_cloning/cloned_repos/{os.path.basename(obtainedURL)}/package.json'))["version"]
@@ -122,10 +260,8 @@ def PackageCreate():
                 'Name': f'{os.path.basename(obtainedURL)}',
                 'Version': f'{version}'}
     
-    #* Increment id_counter
-    id_counter += 1
-    
     #* Form data return json
+    #TODO Should return base64 package, instead of URL
     packageData = {'URL': f'{obtainedURL}'}
 
     #* Return success
