@@ -1,7 +1,8 @@
 from git import Repo  # import git library
 import sys  # import sys to use command line arguments
 import os
-import subprocess
+import re
+import urllib.request as u
 from subprocess import DEVNULL
 
 # open the command line argument file
@@ -26,27 +27,23 @@ if "github" in url:
 # if it was not a git URL, that means it was an npm URL
 else:
 
-    # find the package name in the URL
-    package_name = url[url.find("/package/") + 9 :]
-
-    # clone the current npm URL into 'local_cloning/cloned_repos' directory
-    subprocess.run(
-        ["npm v " + package_name + " dist.tarball | xargs curl | tar -xz"],
-        shell=True,
-        executable="/bin/bash",
-        stdout=DEVNULL,
-        stderr=DEVNULL
-    )
-    subprocess.run(
-        ["mv package/ local_cloning/cloned_repos/" + os.path.basename(url)],
-        shell=True,
-        executable="/bin/bash",
-        stdout=DEVNULL,
-        stderr=DEVNULL
-    )
-
+    webUrl = u.urlopen(url)
+    if webUrl.getcode() == 200:
+        html_cont = webUrl.read().decode("utf-8")
+        r1 = r'<span id="repository-link">(.*?)<\/span>'
+        try:
+            reg_out = re.search(r1, html_cont)
+            gitLink = "https://" + reg_out.group(1)
+        except:
+            raise Exception("Valid GitHub link not found.\n")
+    else:
+        raise Exception("npm url not able to connect.\n")
+    
+    # clone the current git URL into a directory named after the current url_num value
+    Repo.clone_from(gitLink, "local_cloning/cloned_repos/" + os.path.basename(gitLink) + "/")
+    
     # print status update
-    log1.write("finished cloning url #" + os.path.basename(url) + "\n")
+    log1.write("finished cloning url #" + os.path.basename(gitLink) + "\n")
 
 log1.close()
 log2.close()
