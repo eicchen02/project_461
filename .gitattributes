@@ -2,4 +2,4 @@
 # HTML and CSS files were generated from an online program, in order to create
 # a webpage, so we do not believe they should be factored into the percentage
 # calculation.
-templates/* linguist-vendored=false
+*.html -linguist-detectable
