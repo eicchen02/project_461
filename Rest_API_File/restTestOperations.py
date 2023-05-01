@@ -25,14 +25,14 @@ def main():
         print(f'The package was not uploaded, due to an error code {response.status_code}\n')
 
     #TODO Testing (Package By Name Delete)
-    response = requests.delete("http://127.0.0.1:8080/package/byName/testName", headers=header)
+    response = requests.delete("http://127.0.0.1:8080/package/byName/cloudinary_npm", headers=header)
     if(response.status_code == 200):
         print(f'Package By Name Deletion Test: {response.json()}\n')
     else:
         print(f'The package could not be deleted by name, due to an error code {response.status_code}\n')
     
     #TODO Testing (Package By Name History)
-    response = requests.get("http://127.0.0.1:8080/package/byName/testName", headers=header)
+    response = requests.get("http://127.0.0.1:8080/package/byName/cloudinary_npm", headers=header)
     if(response.status_code == 200):
         print(f'Package By Name History Test: {response.json()}\n')
     else:
