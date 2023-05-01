@@ -12,55 +12,35 @@ import sys
 import pymysql
 import sqlalchemy
 from google.cloud.sql.connector import Connector
+from sql_header import *
 
 
-def checkTitle(repo_name, name):
+def checkInput(input_term, search_term):
     if re.search(
-        name.lower(), repo_name.lower()
+        search_term.lower(), input_term.lower()
     ):  # Check the Repo Name contains the name via re regex package
         return 1
     return 0
 
 
-def checkReadMe(readme, name):
-    if re.search(
-        name.lower(), readme.lower()
-    ):  # Check the README contains the name via re regex package
-        return 1
-    return 0
-
-
-connector = Connector()
-
-
-# function to return the database connection
-def getconn() -> pymysql.connections.Connection:
-    conn: pymysql.connections.Connection = connector.connect(
-        "", "pymysql", user="", password="", db=""
-    )
-    return conn
-
-
 def main():
-    name = sys.argv[1]
-    # create connection pool
-    pool = sqlalchemy.create_engine(
-        "mysql+pymysql://",
-        creator=getconn,
-    )
+    search_term = sys.argv[1]
+
     foundNames = []
     # interact with Cloud SQL database using connection pool
+    pool = connect_tcp_socket()
     with pool.connect() as db_conn:
         # query database
         t = sqlalchemy.text("SELECT * FROM Packages")
         result = db_conn.execute(t)
         # Do something with the results
         for row in result:
-            if checkTitle(row[0], name) or checkReadMe(row[9], name):
+            if checkInput(row[0],  search_term) or checkInput(row[1],  search_term) or checkInput(row[9], search_term):
                 foundNames.append(1)
             else:
                 foundNames.append(0)
-    return foundNames
 
+    print(foundNames)
+    return foundNames
 
 main()
