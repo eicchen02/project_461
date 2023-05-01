@@ -21,7 +21,7 @@ def main():
             # Find the URL file from package.json
             package = open(f'local_cloning/cloned_repos/{input}/package.json')
             jsonData = json.load(package)
-            if "url" in jsonData:
+            if "url" in jsonData["repository"]:
                 # URL exists in package
                 url = jsonData["url"]
                 print(url)

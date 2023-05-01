@@ -507,7 +507,6 @@ def PackageUpdate(id=None):
     
     # Update the values for the id
     subprocess.run(["python3", "sql/upload.py"])
-
     
     # Finally, return 200 status code
     return jsonify({'status_code': '200',

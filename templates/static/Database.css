@@ -80,6 +80,11 @@
   margin-bottom: 60px;
 }
 
+.u-repeater {
+  display: grid;
+  grid-template-columns: repeat(3, 33.33333333%);
+}
+
 .u-section-2 .u-repeater-1 {
   grid-template-columns: 25% 25% 25% 25%;
   min-height: 248px;
@@ -149,6 +154,9 @@
 
   .u-section-2 .u-repeater-1 {
     min-height: 204px;
+    display: flex;
+    flex-direction: column;
+
   }
 }
 
