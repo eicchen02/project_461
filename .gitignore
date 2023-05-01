@@ -7,3 +7,6 @@ log/
 local_cloning/cloned_repos
 output/*.txt
 output/*.json
+env.txt
+temp_link.txt
+testing
