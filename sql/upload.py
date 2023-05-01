@@ -4,6 +4,7 @@ import re
 from os import listdir
 from sqlalchemy.orm import sessionmaker
 import sys
+from datetime import datetime
 
 def upload():
     #Get data from output file
@@ -38,20 +39,21 @@ def upload():
                     break
     except:
         raise("Error reading readme")
+    
+    try:
+        package = open(f'local_cloning/cloned_repos/{PackageName}/package.json')
+        jsonData = json.load(package)
+        if "version" in jsonData:
+            # URL exists in package
+            version = jsonData["version"]
+        else:
+            raise("Error getting version")
+    except:
+          raise("Error getting version")
+    
+    exist = exists(table.c.PackageLink, data["URL"])
 
-    pool = connect_tcp_socket()
-    connection = pool.connect()
-    metadata = db.MetaData()
-    table = db.Table('Packages', metadata, autoload_with=pool)
-
-    #Check if url exists already
-    query = db.select(table).where(table.c.PackageLink == data["URL"])
-    result = connection.execute(query)
-    connection.commit()
-    exists = bool(result.fetchone())
-
-
-    if exists is False:
+    if exist is False:
         #Doesnt exist, upload 
         print("It doesn't exist! Uploading", file = sys.stderr)
         query = table.insert().values(
@@ -65,7 +67,9 @@ def upload():
                     Responsiveness = data["RESPONSIVE_MAINTAINER_SCORE"],
                     Licensing = data["LICENSE_SCORE"],
                     PackageName = PackageName,
-                    Readme = readme_content
+                    Readme = readme_content,
+                    LastModified = datetime.now(),
+                    Version = version
                 )
 
     else:
@@ -82,7 +86,9 @@ def upload():
                     Responsiveness = data["RESPONSIVE_MAINTAINER_SCORE"],
                     Licensing = data["LICENSE_SCORE"],
                     PackageName = PackageName,
-                    Readme = readme_content
+                    Readme = readme_content,
+                    LastModified = datetime.now(),
+                    Version = version
                 )
 
     result = connection.execute(query)

@@ -11,12 +11,6 @@ fn main() {
     //this will remove output files and locally cloned repos
     clean_up();
 
-    //this will remove output files and locally cloned repos
-    clean_up();
-
-    //this will remove output files and locally cloned repos
-    clean_up();
-
     //Obtain flag from ./run (-s, -p, -u)
     let flag: &String = &cli_input[3];
 
@@ -168,8 +162,6 @@ fn main() {
             std::process::exit(1);
         }
 
-        //this will remove output files and locally cloned repos
-        clean_up();
     }
 
     //exit 0 on success
@@ -240,11 +232,23 @@ fn clean_up() {
         };
     }
 
-    let _clean_respmain = match fs::remove_file("output/resp_maintain_out.txt") {
-        Ok(_clean_respmain) => _clean_respmain,
-        Err(..) => {
-            println!("Error cleaning responsive maintainer output!\n");
-            std::process::exit(1);
-        }
-    };
+    if Path::new("output/resp_maintain_out.txt").exists(){
+        let _clean_respmain = match fs::remove_file("output/resp_maintain_out.txt") {
+            Ok(_clean_respmain) => _clean_respmain,
+            Err(..) => {
+                println!("Error cleaning responsive maintainer output!\n");
+                std::process::exit(1);
+            }
+        };
+    }
+
+    if Path::new("output/pinningpractice_out.txt").exists(){
+        let _clean_respmain = match fs::remove_file("output/pinningpractice_out.txt") {
+            Ok(_clean_respmain) => _clean_respmain,
+            Err(..) => {
+                println!("Error cleaning pinning practice output!\n");
+                std::process::exit(1);
+            }
+        };
+    }
 }
