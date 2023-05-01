@@ -487,7 +487,7 @@ def PackageUpdate(id=None):
 
     #* Update the values for the id
     #! Need to implement SQL functionality beforehand. Then, do the same as for PackageCreate does.
-    
+
     #* Finally, return 200 status code
 
     return jsonify({'status_code': '200',
