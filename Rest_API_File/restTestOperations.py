@@ -27,7 +27,6 @@ def main():
     else:
         print(f'The package was not uploaded, due to an error code {response.status_code}\n')
     
-    
     #TODO Testing (Package By Name History)
     response = requests.get("http://127.0.0.1:8080/package/byName/" + package, headers=header)
     if(response.status_code == 200):
