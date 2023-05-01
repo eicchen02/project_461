@@ -304,7 +304,7 @@ def PackageCreate():
     for score in output.values():
         if score < 0.5:
             session['upload_status_details'] = "Package is not uploaded due to a disqualified rating.\nEvery metric must score greater than 0.5"
-            return return jsonify({'status_code': '424','message': 'Package is not uploaded due to the disqualified rating.'}), 424, {'content_type': 'application/json'}
+            return jsonify({'status_code': '424','message': 'Package is not uploaded due to the disqualified rating.'}), 424, {'content_type': 'application/json'}
 
     # Upload to SQL database
     subprocess.run(["python3", "sql/upload.py"])
