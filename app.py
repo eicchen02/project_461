@@ -203,9 +203,9 @@ def download():
             session['download_status'] = "No such package exists!"
             return redirect(url_for('downloadComplete'))
         
-        # Create the Base64 package, and return the package
-        encodedPackage = createEncodedFile(package_url)
-        return send_file(f'{encodedPackage}', as_attachment=True)
+        # Create the Base64 package, and return the package. Can be changed to be .zip instead if needed
+        zipPackage, encodedPackage = createEncodedFile(package_url)
+        return send_file(f'{zipPackage}', as_attachment=True)
     else:
         # First, delete all previous .zip and Base64 files
         for f in os.listdir('local_cloning/encoded_repos'):
@@ -327,7 +327,7 @@ def PackageCreate():
                 'Version': f'{version}'}
     
     # Form the data return field. Contains the Base64 package and URL
-    base64PackageName = createEncodedFile(obtainedURL)
+    zipPackageName, base64PackageName = createEncodedFile(obtainedURL)
     with open(base64PackageName, 'rb') as encodedPackage:
         packageData = {'Content': f'{encodedPackage.read()}',
                        'URL': f'{obtainedURL}'}
