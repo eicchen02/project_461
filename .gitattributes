@@ -3,3 +3,4 @@
 # a webpage, so we do not believe they should be factored into the percentage
 # calculation.
 *.html -linguist-detectable
+*.css -linguist-detectable

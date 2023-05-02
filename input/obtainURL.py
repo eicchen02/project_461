@@ -23,7 +23,7 @@ def main():
             jsonData = json.load(package)
             if "url" in jsonData["repository"]:
                 # URL exists in package
-                url = jsonData["url"]
+                url = jsonData["repository"]["url"]
                 print(url)
             else:
                 #! Should return error 400 through REST API, once it has been set up
