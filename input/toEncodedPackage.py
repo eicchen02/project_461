@@ -10,6 +10,10 @@ def createEncodedFile(url):
     # Grabs the package URL passed in
     packageURL = url
     
+    # Check if the 'encoded_repos' filepath exists, and makes it if not
+    if not os.path.exists('./local_cloning/encoded_repos'):
+        os.makedirs('./local_cloning/encoded_repos')
+    
     # Checks if the package is already downloaded locally to prevent redownloads
     path = f'./local_cloning/cloned_repos/{os.path.basename(packageURL)}/'
 
