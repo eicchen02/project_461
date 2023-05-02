@@ -2,10 +2,11 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 import json
 import subprocess
 import os
+import connexion
 from json import load
 from time import sleep
 from os import remove
-import connexion
+from input.toEncodedPackage import createEncodedFile
 from sys import stderr
 
 id_counter = 0
