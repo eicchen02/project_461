@@ -468,7 +468,6 @@ def PackageRetrieve(id=None):
     with open(base64PackagePath, 'rb') as data:
         packageData = {'URL': f'{result[2]}',
                        'Content': f'{data.read()}'}
-    
     packageMetadata = {'ID': f'{id}',
                        'Name': f'{result[0]}',
                        'Version': f'{result[1]}'}
@@ -574,10 +573,12 @@ def PackagesList():
 @app.route('/reset', methods=["DELETE"])
 def RegistryReset():
 
+    # SQL delete table
     query = db.delete(table)
     connection.execute(query)
     connection.commit()
 
+    # Return success
     return jsonify({'status_code': '200',
                     'message': 'Registry is reset'}), 200, {'content_type': 'application/json'}
 
