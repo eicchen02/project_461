@@ -459,15 +459,25 @@ def PackageRetrieve(id=None):
        return jsonify({'status_code': '404',
                         'message': 'Package doesn\'t exist.'}), 404, {'content_type': 'application/json'}
     
+    # Obtain the URL from the database
+    query = db.select(table.c["PackageName", "Version", "PackageLink"]).where(table.c.ID == id)
+    result = connection.execute(query).fetchone()
+    
     # Then, convert package into base64/obtain base64 package for PackageData type field
-    #! Need to implement SQL functionality beforehand to obtain the URL/Base64 package uploaded.
+    zipPackagePath, base64PackagePath = createEncodedFile(result[2])
+    with open(base64PackagePath, 'rb') as data:
+        packageData = {'URL': f'{result[2]}',
+                       'Content': f'{data.read()}'}
     
-    # Finally, return Package to user. Should follow the 'Package' Schema, which involves 'PackageData' and 'PackageMetadata'
-    #! Need to implement SQL first to get data
+    packageMetadata = {'ID': f'{id}',
+                       'Name': f'{result[0]}',
+                       'Version': f'{result[1]}'}
     
-    # Temp return for now
-    return jsonify({'code': '200',
-                    'message': 'This is a test, must implement later'}), 200, {'content_type': 'application/json'}
+    # Return success
+    return jsonify({'status_code': '200',
+                    'message': 'Success. The package has been obtained by ID.',
+                    'data': f'{packageData}',
+                    'metadata': f'{packageMetadata}'}), 200, {'content_type': 'application/json'}
 
 #? This will replace the current ID with a new package 
 #? version (update), as long as ID, version, and name match.
