@@ -77,7 +77,7 @@ def upload():
 
         #! Performs Ingestion on the package (disabled)
         for score in output.values():
-            if score < 0.5:
+            if type(score) == float and score < 0.5:
                 session['upload_status_details'] = "Package is not uploaded due to a disqualified rating.\nEvery metric must score greater than 0.5"
                 return redirect(url_for('uploadComplete'))
 
@@ -302,7 +302,7 @@ def PackageCreate():
             
     #! Performs Ingestion on the package (disabled)
     for score in output.values():
-        if score < 0.5:
+        if type(score) == float and score < 0.5:
             session['upload_status_details'] = "Package is not uploaded due to a disqualified rating.\nEvery metric must score greater than 0.5"
             return jsonify({'status_code': '424','message': 'Package is not uploaded due to the disqualified rating.'}), 424, {'content_type': 'application/json'}
 
