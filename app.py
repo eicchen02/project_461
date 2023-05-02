@@ -175,10 +175,10 @@ def rate():
         columns =  ["PackageName", "PackageLink", "Responsiveness", "UpdatedCode", "Correctness", "BusFactor", "RampUp", "Licensing", "Pinning", "NetScore"]
         query = db.select(table).where(table.c.PackageLink == package_url)
         result = connection.execute(query).fetchall()
-
+        print(table.columns.keys())
         # Return rating page that shows all scores according to the data gathered
-        session['rate_status'] = "Package has been Rated"
-        session['rate_status_details'] = result
+        session['rate_status'] = f'Results for {result[0][0]}:'
+        session['rate_status_details'] = f'Net Score: {result[0][8]}, Bus Factor: {result[0][5]}, Ramp Up: {result[0][6]},\n Pinning Practice: {result[0][10]}, Responsiveness: {result[0][2]}, Pull Requests: {result[0][3]}\n, Correctness: {result[0][4]}, Licensing: {result[0][7]}'
         return redirect(url_for('rateComplete'))
     else:
         # Otherwise, just return the Rate page (A "GET" Operation)
@@ -190,6 +190,7 @@ def rate():
 def download():
     # If the submit button is pressed (A "POST" Operation)
     if (request.method == "POST"):
+
         # Sets the default status to be an error
         session['download_status'] = "Error with Downloading"
         
@@ -198,15 +199,18 @@ def download():
         
         # Search through the SQL database in order to find the corresponding URL
         exist = exists(table.c.PackageLink, package_url)
-
         if exist is False:
             session['download_status'] = "No such package exists!"
             return redirect(url_for('downloadComplete'))
         
         # Create the Base64 package, and return the package
         encodedPackage = createEncodedFile(package_url)
-        return send_file(encodedPackage, as_attachment=True)
+        return send_file(f'{encodedPackage}', as_attachment=True)
     else:
+        # First, delete all previous .zip and Base64 files
+        for f in os.listdir('local_cloning/encoded_repos'):
+            os.remove(os.path.join('local_cloning/encoded_repos', f))
+        
         # Otherwise, just return the Download page (A "GET" Operation)
         return render_template('/interactions/Download.html')
 
