@@ -269,7 +269,10 @@ def CreateAuthToken():
 def PackageCreate():   
     
     # Loads and checks the data from the request
+    #!logs input
     data = json.loads(request.data)
+    print("Autograder input: " + data, file = stderr)
+
     if "URL" in data and data["URL"] != None:
         file = data["URL"]
     elif "Content" in data and data["Content"] != None:
@@ -390,10 +393,14 @@ def PackageByNameGet(name=None):
 #? for a list of Package types.
 @app.route('/package/byRegEx', methods=["POST"])
 def PackageByRegExGet():
+
+    #!logs input
+    data = json.loads(request.data)
+    print("Autograder input: " + data, file = stderr)
     
     # Loads and checks the data from the request.
     #TODO Assuming currently that this is saved in the json under the 'regex' key. May not be in actuality
-    regex = json.loads(request.data)["regex"]
+    regex = data["regex"]
     if regex == None:
         return jsonify({'status_code': '400',
                         'message': 'There must be a regular expression that can be used in the body.'}), 400, {'content_type': 'application/json'}
@@ -490,7 +497,9 @@ def PackageUpdate(id=None):
                         'message': 'There must be an ID value in order to delete packages'}), 400, {'content_type': 'application/json'}
     
     # Next, obtain data from response.
+    #!logs input
     data = json.loads(request.data)
+    print("Autograder input: " + data, file = stderr)
     
     # Then, check that there is an ID, name, and version provided
     if not data["id"]:
@@ -555,7 +564,11 @@ def PackageRate(id=None):
                   'PullRequest': f'{result[5]}',
                   'RampUp': f'{result[6]}',
                   'ResponsiveMaintainer': f'{result[7]}'}
-
+    
+    #!logs input
+    data = json.loads(request.data)
+    print("Autograder input: " + data, file = stderr)
+    
     return jsonify({'status_code': '200',
                     'message': 'Rating has been calculated. View the \'data\' field for values',
                     'data': packageRatings}), 200, {'content_type': 'application/json'}
