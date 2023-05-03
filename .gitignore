@@ -5,6 +5,7 @@ __pycache__/
 target/
 log/
 local_cloning/cloned_repos
+local_cloning/encoded_repos
 output/*.txt
 output/*.json
 env.txt
