@@ -200,7 +200,7 @@ def download():
         # Search through the SQL database in order to find the corresponding URL
         exist = exists(table.c.PackageLink, package_url)
         if exist is False:
-            session['download_status'] = "No such package exists!"
+            session['download_status_details'] = "No such package exists!"
             return redirect(url_for('downloadComplete'))
         
         # Create the Base64 package, and return the package. Can be changed to be .zip instead if needed
