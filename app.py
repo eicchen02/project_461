@@ -77,10 +77,10 @@ def upload():
         output = load(open("output/output.json"))[0]
 
         # Performs Ingestion on the package (enabled)
-        # for score in output.values():
-        #     if type(score) == float and score < 0.5:
-        #         session['upload_status_details'] = "Package is not uploaded due to a disqualified rating.\nEvery metric must score greater than 0.5"
-        #         return redirect(url_for('uploadComplete'))
+        for score in output.values():
+            if type(score) == float and score < 0.5:
+                session['upload_status_details'] = "Package is not uploaded due to a disqualified rating.\nEvery metric must score greater than 0.5"
+                return redirect(url_for('uploadComplete'))
 
         # Upload to SQL database
         subprocess.run(["python3", "sql/upload.py"])
@@ -302,10 +302,10 @@ def PackageCreate():
                         'message': 'Package exists already.'}), 409, {'content_type': 'application/json'}
             
     # Performs Ingestion on the package (enabled)
-    # for score in output.values():
-    #     if type(score) == float and score < 0.5:
-    #         session['upload_status_details'] = "Package is not uploaded due to a disqualified rating.\nEvery metric must score greater than 0.5"
-    #         return jsonify({'status_code': '424','message': 'Package is not uploaded due to the disqualified rating.'}), 424, {'content_type': 'application/json'}
+    for score in output.values():
+        if type(score) == float and score < 0.5:
+            session['upload_status_details'] = "Package is not uploaded due to a disqualified rating.\nEvery metric must score greater than 0.5"
+            return jsonify({'status_code': '424','message': 'Package is not uploaded due to the disqualified rating.'}), 424, {'content_type': 'application/json'}
 
     # Upload to SQL database
     subprocess.run(["python3", "sql/upload.py"])

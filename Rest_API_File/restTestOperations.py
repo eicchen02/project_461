@@ -10,6 +10,13 @@ def main(link):
     #* Setup of header for all tests
     header = {'X-Authorization': 'Test'}
     
+    #TODO Testing (Database Reset)
+    response = requests.delete(link + "/reset", headers=header)
+    if(response.status_code == 200):
+        print(f'Database Reset Test: {response.json()}\n')
+    else:
+        print(f'The database could not be reset, due to an error code {response.status_code}\n')
+    
     #* Testing (Authenticate)
     response = requests.put( link + "/authenticate", json={'Secret': {'password': 'TestTest'},
                                                                         'User': {'isAdmin': True,
@@ -49,7 +56,7 @@ def main(link):
     response = requests.get(link + "/package/" + id, headers=header)
     if(response.status_code == 200):
         if response.json()["data"]["Content"] != None:
-            print("Package By ID Retrieve Test: Correctly content field\n")
+            print(f'Package By ID Retrieve Test: Content field: {response.json()["data"]["Content"]}\n')
         else:
             print("Package By ID Retrieve Test: Obtained 200, but not 'Content' field\n")
     else:
@@ -87,19 +94,11 @@ def main(link):
 
 
     #TODO Testing (Package By ID Delete)
-    response = requests.delete(link + "/package/0", headers=header)
+    response = requests.delete(link + "/package/" + id, headers=header)
     if(response.status_code == 200):
         print(f'Package By ID Delete Test: {response.json()}\n')
     else:
         print(f'The package could not be deleted by ID, due to an error code {response.status_code}\n')
-    
-    
-    # #TODO Testing (Database Reset)
-    # response = requests.delete(link + "/reset", headers=header)
-    # if(response.status_code == 200):
-    #     print(f'Database Reset Test: {response.json()}\n')
-    # else:
-    #     print(f'The database could not be reset, due to an error code {response.status_code}\n')
     
 if __name__ == "__main__":
     # print(argv)
