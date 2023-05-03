@@ -566,10 +566,6 @@ def PackageRate(id=None):
                   'RampUp': f'{result[6]}',
                   'ResponsiveMaintainer': f'{result[7]}'}
     
-    #!logs input
-    data = json.loads(request.data)
-    print("Autograder input: {}".format(data), file = stderr)
-    
     return jsonify({'status_code': '200',
                     'message': 'Rating has been calculated. View the \'data\' field for values',
                     'data': packageRatings}), 200, {'content_type': 'application/json'}
