@@ -4,6 +4,7 @@ import json
 import subprocess
 import os
 from input.toEncodedPackage import createEncodedFile
+from sql.search import *
 from json import load
 from time import sleep
 from os import remove
@@ -342,57 +343,9 @@ def PackageCreate():
                     'data': packageData,
                     'metadata': metadata}), 201, {'content_type': 'application/json'}
 
-#? This will delete packages from SQL database 
-#? by the name provided.
-@app.route('/package/byName/{name}', methods=["DELETE"])
-def PackageByNameDelete(name=None):
-    # Check if a name is actually passed, and return error if not
-    if name == None:
-        return jsonify({'status_code': '400',
-                        'message': 'Package name cannot be \'None\'.'}), 400, {'content_type': 'application/json'}
-    
-    # First, check if package name is in our SQL database. Return 404 if not in database
-    exist = exists(table.c.PackageName, name)
-    if exist is False:
-       return jsonify({'status_code': '404',
-                        'message': 'Package doesn\'t exist.'}), 404, {'content_type': 'application/json'}
-
-    # Then, use SQL commands to delete package
-    query = db.delete(table).where(table.c.PackageName == name)
-    connection.execute(query)
-    connection.commit()
-    
-    # Finally, return 200 if everything is successful
-    return jsonify({'status_code': '200',
-                    'message': 'Package is deleted'}), 200, {'content_type': 'application/json'}
-
-#? This will obtain the most recent change to the 
-#? package (date of last modification).
-@app.route('/package/byName/{name}', methods=["GET"])
-def PackageByNameGet(name=None):
-    # Check if a name is actually passed, and return error if not
-    if name == None:
-        return jsonify({'status_code': '400',
-                        'message': 'Package name cannot be \'None\'.'}), 400, {'content_type': 'application/json'}
-    
-    # First, check if the package name is in our SQL database. Return 404 if not in database
-    exist = exists(table.c.PackageName, name)
-    if exist is False:
-       return jsonify({'status_code': '404',
-                        'message': 'Package doesn\'t exist.'}), 404, {'content_type': 'application/json'}
-    
-    # Then, use SQL commands to obtain when the package was entered into the SQL database
-    query = db.select(table.c.LastModified).where(table.c.PackageName == name)
-    history_date = connection.execute(query).scalar()
-    
-    # Finally, return 200 with correct message
-    return jsonify({'status_code': '200',
-                    'message' : 'Obtained the history of the given package. Check in the \'history\' field for the data.',
-                    'history' : f'{history_date}'}), 200, {'content_type': 'application/json'}
-
 #? This uses the search function that we have created to search
 #? for a list of Package types.
-@app.route('/package/byRegEx', methods=["POST"])
+@app.route('/package/byRegEx', methods=["GET"])
 def PackageByRegExGet():
 
     #!logs input
@@ -408,27 +361,76 @@ def PackageByRegExGet():
     
     # Otherwise, perform search function through SQL database
     packageMatches = []
-    #! Need to implement SQL functionality to search correctly for a RegEx expression through READMEs and names
+    t = sqlalchemy.text("SELECT * FROM Packages")
+    result = connection.execute(t)
     
+    # Do something with the results
+    for row in result:
+        if checkInput(row[0],  regex) or checkInput(row[1],  regex) or checkInput(row[9], regex):
+            packageMatches.append({'Name': row[0], 'ID': row[11], 'Version': row[13]})
+            
     # If the package is not found, return 404 error
-    if packageMatches:
+    if not packageMatches:
         return jsonify({'status_code': '404',
-                        'message': 'No package found under this regex'}), 400, {'content_type': 'application/json'}
-    
-    packageMetadata = []
-    #TODO Psuedocode Listed Here:
-    #TODO for package in packageMatches:
-    #TODO     packageMetadata.append({'ID': f'{package["ID"]}',
-    #TODO                             'Name': f'{package["Name"]}',
-    #TODO                             'Version': f'{package["Version"]}})
+                        'message': 'No package found under this regex'}), 404, {'content_type': 'application/json'}
     
     # Otherwise, return a list of all packages that match
     return jsonify({'status_code': '200',
                     'message': 'Attached is the list of packages. Check the \'data\' field for the list',
-                    'data': f'{packageMatches}'}), 200, {'content_type': 'application/json'}
+                    'data': packageMatches}), 200, {'content_type': 'application/json'}
+
+
+#? This will delete packages from SQL database 
+#? by the name provided.
+@app.route('/package/byName/<name>', methods=["DELETE"])
+def PackageByNameDelete(name=None):
+    # Check if a name is actually passed, and return error if not
+    if name == None:
+        return jsonify({'status_code': '400',
+                        'message': 'Package name cannot be \'None\'.'}), 400, {'content_type': 'application/json'}
+    
+    # First, check if package name is in our SQL database. Return 404 if not in database
+    exist = exists(table.c.PackageName, name)
+    if exist is False:
+       return jsonify({'status_code': '404',
+                        'message': 'Package doesn\'t exist 7.'}), 404, {'content_type': 'application/json'}
+
+    # Then, use SQL commands to delete package
+    query = db.delete(table).where(table.c.PackageName == name)
+    connection.execute(query)
+    connection.commit()
+    
+    # Finally, return 200 if everything is successful
+    return jsonify({'status_code': '200',
+                    'message': 'Package is deleted'}), 200, {'content_type': 'application/json'}
+
+#? This will obtain the most recent change to the 
+#? package (date of last modification).
+@app.route('/package/byName/<name>', methods=["GET"])
+def PackageByNameGet(name=None):
+    # Check if a name is actually passed, and return error if not
+    if name == None:
+        return jsonify({'status_code': '400',
+                        'message': 'Package name cannot be \'None\'.'}), 400, {'content_type': 'application/json'}
+    
+    # First, check if the package name is in our SQL database. Return 404 if not in database
+    exist = exists(table.c.PackageName, name)
+    if exist is False:
+       return jsonify({'status_code': '404',
+                        'message': 'Package doesn\'t exist 8.'}), 404, {'content_type': 'application/json'}
+    
+    # Then, use SQL commands to obtain when the package was entered into the SQL database
+    query = db.select(table.c.LastModified).where(table.c.PackageName == name)
+    history_date = connection.execute(query).scalar()
+    
+    # Finally, return 200 with correct message
+    return jsonify({'status_code': '200',
+                    'message' : 'Obtained the history of the given package. Check in the \'history\' field for the data.',
+                    'history' : f'{history_date}'}), 200, {'content_type': 'application/json'}
+
 
 #? This deletes packages based on the id provided.
-@app.route('/package/{id}', methods=["DELETE"])
+@app.route('/package/<id>', methods=["DELETE"])
 def PackageDelete(id=None):
     
     # First, check if ID is none
@@ -440,7 +442,7 @@ def PackageDelete(id=None):
     exist = exists(table.c.ID, id)
     if exist is False:
        return jsonify({'status_code': '404',
-                        'message': 'Package doesn\'t exist.'}), 404, {'content_type': 'application/json'}
+                        'message': 'Package doesn\'t exist 1.'}), 404, {'content_type': 'application/json'}
     
     # Then, delete package from SQL database
     query = db.delete(table).where(table.c.ID == id)
@@ -453,7 +455,7 @@ def PackageDelete(id=None):
 
 #? This retrieves a base64 package from the database. This 
 #? operates similarly to the 'Download" Frontend Page Operation.
-@app.route('/package/{id}', methods=["GET"])
+@app.route('/package/<id>', methods=["GET"])
 def PackageRetrieve(id=None):
     
     # First, check if ID is none
@@ -465,7 +467,7 @@ def PackageRetrieve(id=None):
     exist = exists(table.c.ID, id)
     if exist is False:
        return jsonify({'status_code': '404',
-                        'message': 'Package doesn\'t exist.'}), 404, {'content_type': 'application/json'}
+                        'message': 'Package doesn\'t exist 2.'}), 404, {'content_type': 'application/json'}
     
     # Obtain the URL from the database
     query = db.select(table.c["PackageName", "Version", "PackageLink"]).where(table.c.ID == id)
@@ -489,7 +491,7 @@ def PackageRetrieve(id=None):
 #? This will replace the current ID with a new package 
 #? version (update), as long as ID, version, and name match.
 #? aka update by ID
-@app.route('/package/{id}', methods=["PUT"])
+@app.route('/package/<id>', methods=["PUT"])
 def PackageUpdate(id=None):
     
     # First, check if ID is none
@@ -519,15 +521,15 @@ def PackageUpdate(id=None):
 
     if return_list[0] != data["id"]:
         return jsonify({'status_code': '404',
-                        'message': 'Package does not exist. There must be an \'id\', \'name\', and \'version\'.'}), 404, {'content_type': 'application/json'}
+                        'message': 'Package does not exist 3. There must be an \'id\', \'name\', and \'version\'.'}), 404, {'content_type': 'application/json'}
     
     if return_list[1] != data["name"]:
         return jsonify({'status_code': '404',
-                        'message': 'Package does not exist. There must be an \'id\', \'name\', and \'version\'.'}), 404, {'content_type': 'application/json'}
+                        'message': 'Package does not exist 4. There must be an \'id\', \'name\', and \'version\'.'}), 404, {'content_type': 'application/json'}
 
     if return_list[2] != data["version"]:
         return jsonify({'status_code': '404',
-                        'message': 'Package does not exist. There must be an \'id\', \'name\', and \'version\'.'}), 404, {'content_type': 'application/json'}
+                        'message': 'Package does not exist 5. There must be an \'id\', \'name\', and \'version\'.'}), 404, {'content_type': 'application/json'}
     
     # Update the values for the id
     subprocess.run(["python3", "sql/upload.py"])
@@ -538,7 +540,7 @@ def PackageUpdate(id=None):
 
 #? This is the rating function for a package's id value. This
 #? operates similarly to the "Rate" Frontend Page Operation.
-@app.route('/package/{id}/rate', methods=["GET"])
+@app.route('/package/<id>/rate', methods=["GET"])
 def PackageRate(id=None):
     
     # First, check if id is None
@@ -550,7 +552,7 @@ def PackageRate(id=None):
     exist = exists(table.c.ID, id)
     if exist is False:
        return jsonify({'status_code': '404',
-                        'message': 'Package doesn\'t exist.'}), 404, {'content_type': 'application/json'}
+                        'message': 'Package doesn\'t exist 6.'}), 404, {'content_type': 'application/json'}
     
     # Then, obtain the scores from the SQL database
     query = db.select(table.c["BusFactor", "Correctness", "Pinning", "Licensing", "NetScore", "UpdatedCode", "RampUp", "Responsiveness"]).where(table.c.ID == id)
