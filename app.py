@@ -208,8 +208,9 @@ def download():
         return send_file(f'{zipPackage}', as_attachment=True)
     else:
         # First, delete all previous .zip and Base64 files
-        for f in os.listdir('local_cloning/encoded_repos'):
-            os.remove(os.path.join('local_cloning/encoded_repos', f))
+        if os.path.exists('./local_cloning/encoded_repos'):
+            for f in os.listdir('local_cloning/encoded_repos'):
+                os.remove(os.path.join('local_cloning/encoded_repos', f))
         
         # Otherwise, just return the Download page (A "GET" Operation)
         return render_template('/interactions/Download.html')
