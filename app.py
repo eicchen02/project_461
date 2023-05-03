@@ -270,9 +270,9 @@ def PackageCreate():
     
     # Loads and checks the data from the request
     data = json.loads(request.data)
-    if "URL" in data:
+    if "URL" in data and data["URL"] != None:
         file = data["URL"]
-    elif "Content" in data:
+    elif "Content" in data and data["Content"] != None:
         file = data["Content"]
     else:
         return jsonify({'status_code': '400',
