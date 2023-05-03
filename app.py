@@ -77,10 +77,10 @@ def upload():
         output = load(open("output/output.json"))[0]
 
         # Performs Ingestion on the package (enabled)
-        for score in output.values():
-            if type(score) == float and score < 0.5:
-                session['upload_status_details'] = "Package is not uploaded due to a disqualified rating.\nEvery metric must score greater than 0.5"
-                return redirect(url_for('uploadComplete'))
+        # for score in output.values():
+        #     if type(score) == float and score < 0.5:
+        #         session['upload_status_details'] = "Package is not uploaded due to a disqualified rating.\nEvery metric must score greater than 0.5"
+        #         return redirect(url_for('uploadComplete'))
 
         # Upload to SQL database
         subprocess.run(["python3", "sql/upload.py"])
@@ -272,7 +272,7 @@ def PackageCreate():
     # Loads and checks the data from the request
     #!logs input
     data = json.loads(request.data)
-    print("Autograder input: " + data, file = stderr)
+    print("Autograder input: {}".format(data), file = stderr)
 
     if "URL" in data and data["URL"] != None:
         file = data["URL"]
@@ -302,10 +302,10 @@ def PackageCreate():
                         'message': 'Package exists already.'}), 409, {'content_type': 'application/json'}
             
     # Performs Ingestion on the package (enabled)
-    for score in output.values():
-        if type(score) == float and score < 0.5:
-            session['upload_status_details'] = "Package is not uploaded due to a disqualified rating.\nEvery metric must score greater than 0.5"
-            return jsonify({'status_code': '424','message': 'Package is not uploaded due to the disqualified rating.'}), 424, {'content_type': 'application/json'}
+    # for score in output.values():
+    #     if type(score) == float and score < 0.5:
+    #         session['upload_status_details'] = "Package is not uploaded due to a disqualified rating.\nEvery metric must score greater than 0.5"
+    #         return jsonify({'status_code': '424','message': 'Package is not uploaded due to the disqualified rating.'}), 424, {'content_type': 'application/json'}
 
     # Upload to SQL database
     subprocess.run(["python3", "sql/upload.py"])
@@ -397,7 +397,7 @@ def PackageByRegExGet():
 
     #!logs input
     data = json.loads(request.data)
-    print("Autograder input: " + data, file = stderr)
+    print("Autograder input: {}".format(data), file = stderr)
     
     # Loads and checks the data from the request.
     #TODO Assuming currently that this is saved in the json under the 'regex' key. May not be in actuality
@@ -500,7 +500,7 @@ def PackageUpdate(id=None):
     # Next, obtain data from response.
     #!logs input
     data = json.loads(request.data)
-    print("Autograder input: " + data, file = stderr)
+    print("Autograder input: {}".format(data), file = stderr)
     
     # Then, check that there is an ID, name, and version provided
     if not data["id"]:
@@ -568,7 +568,7 @@ def PackageRate(id=None):
     
     #!logs input
     data = json.loads(request.data)
-    print("Autograder input: " + data, file = stderr)
+    print("Autograder input: {}".format(data), file = stderr)
     
     return jsonify({'status_code': '200',
                     'message': 'Rating has been calculated. View the \'data\' field for values',
