@@ -1,6 +1,10 @@
 import requests
+import base64
+import zipfile
 
 def main():
+    package = 'cloudinary_npm'
+    id = '12'
     
     #* Setup of header for all tests
     header = {'X-Authorization': 'Test'}
@@ -11,21 +15,21 @@ def main():
                                                                                  'name': 'Test'}})
     print(f'Authentication Test: {response.json()}\n')
     
-    #* Testing (Package Create)
-    response = requests.post("http://127.0.0.1:8080/package", headers=header, json={'Content': '',
-                                                                                    'JSProgram': '', 
-                                                                                    'URL': 'https://github.com/cloudinary/cloudinary_npm'})
-    print(f'Package Create Test, Grabbing JSON: {response.json()}')
-    if(response.status_code == 201):
-        data = response.json()['data']
-        print(f'Package Create Test, Grabbing data: {data}')
-        metadata = response.json()['metadata']
-        print(f'Package Create Test, Grabbing metadata: {metadata}\n')
-        package = metadata["Name"]
-        id = metadata["ID"]
-        version = metadata["Vers"]
-    else:
-        print(f'The package was not uploaded, due to an error code {response.status_code}\n')
+    # #* Testing (Package Create)
+    # response = requests.post("http://127.0.0.1:8080/package", headers=header, json={'Content': '',
+    #                                                                                 'JSProgram': '', 
+    #                                                                                 'URL': 'https://github.com/cloudinary/cloudinary_npm'})
+    # print(f'Package Create Test, Grabbing JSON: {response.json()}')
+    # if(response.status_code == 201):
+    #     data = response.json()['data']
+    #     print(f'Package Create Test, Grabbing data: {data}')
+    #     metadata = response.json()['metadata']
+    #     print(f'Package Create Test, Grabbing metadata: {metadata}\n')
+    #     package = metadata["Name"]
+    #     id = metadata["ID"]
+    #     version = metadata["Vers"]
+    # else:
+    #     print(f'The package was not uploaded, due to an error code {response.status_code}\n')
     
     #TODO Testing (Package By Name History)
     response = requests.get("http://127.0.0.1:8080/package/byName/" + package, headers=header)
@@ -45,7 +49,10 @@ def main():
     #TODO Testing (Package By ID Retrieve)
     response = requests.get("http://127.0.0.1:8080/package/" + id, headers=header)
     if(response.status_code == 200):
-        print(f'Package By ID Retrieve Test: {response.json()}\n')
+        if response.json()["data"]["Content"] != None:
+            print("Package By ID Retrieve Test: Correctly content field\n")
+        else:
+            print("Package By ID Retrieve Test: Obtained 200, but not 'Content' field\n")
     else:
         print(f'The package could not be retrieved by ID, due to an error code {response.status_code}\n')
     

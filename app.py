@@ -335,8 +335,8 @@ def PackageCreate():
     # Return success
     return jsonify({'status_code': '201',
                     'message': 'Success. Check the ID in the returned metadata for the official ID.',
-                    'data': f'{packageData}',
-                    'metadata': f'{metadata}'}), 201, {'content_type': 'application/json'}
+                    'data': packageData,
+                    'metadata': metadata}), 201, {'content_type': 'application/json'}
 
 #? This will delete packages from SQL database 
 #? by the name provided.
@@ -475,8 +475,8 @@ def PackageRetrieve(id=None):
     # Return success
     return jsonify({'status_code': '200',
                     'message': 'Success. The package has been obtained by ID.',
-                    'data': f'{packageData}',
-                    'metadata': f'{packageMetadata}'}), 200, {'content_type': 'application/json'}
+                    'data': packageData,
+                    'metadata': packageMetadata}), 200, {'content_type': 'application/json'}
 
 #? This will replace the current ID with a new package 
 #? version (update), as long as ID, version, and name match.
@@ -558,7 +558,7 @@ def PackageRate(id=None):
 
     return jsonify({'status_code': '200',
                     'message': 'Rating has been calculated. View the \'data\' field for values',
-                    'data': f'{packageRatings}'}), 200, {'content_type': 'application/json'}
+                    'data': packageRatings}), 200, {'content_type': 'application/json'}
 
 #? This is the fetch command. Need to understand it more
 #? before implementing it.

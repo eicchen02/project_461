@@ -51,7 +51,8 @@ def createEncodedFile(url):
     
     # Now Base64 encode the file
     with open(f'./local_cloning/encoded_repos/{os.path.basename(packageURL)}.zip', 'rb') as fin, open(f'./local_cloning/encoded_repos/{os.path.basename(packageURL)}_base64', 'wb') as fout:
-        base64.encode(fin, fout)
+        encoded = base64.b64encode(fin.read())
+        fout.write(encoded)
     
     # Finally, return the base64 and zip filename that has been created
     zipName = f'./local_cloning/encoded_repos/{os.path.basename(packageURL)}.zip'
