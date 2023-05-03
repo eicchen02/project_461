@@ -3,6 +3,7 @@ import json
 import os
 import re
 import urllib.request as url
+from urllib.parse import urlparse
 import sys
 import requests
 
@@ -27,7 +28,8 @@ def getGithubURLs(repo):
 def count_pinned_dependencies(repo_url):
     '''Counts the pinned dependencies'''
     # Parse the repository owner and name from the URL
-    match = re.match(r'https://github.com/([\w-]+)/([\w-]+)', repo_url)
+    path = urlparse(repo_url).path
+    match = re.match(r'/([\w-]+)/([\w-]+)', path)
     if not match:
         raise BadRequest('Invalid repository URL')
     owner = match.group(1)
