@@ -474,21 +474,21 @@ def PackageRetrieve(id=None):
     
     # Then, convert package into base64/obtain base64 package for PackageData type field
     zipPackagePath, base64PackagePath = createEncodedFile(result[2])
-    data = open(base64PackagePath, 'rb')
     packageMetadata = {'ID': f'{id}',
                        'Name': f'{result[0]}',
                        'Version': f'{result[1]}'}
     
     # Return success
     def generator(packageMetadata, URL, ContentFile):
+        f = open(ContentFile, 'rb')
         yield  '{"status_code": "200", "message": "Success. The package has been obtained by ID.", "metadata": ' + json.dumps(packageMetadata) + ', "data": {"URL": "' + URL + '", "Content": "'
         while True:
-            data = ContentFile.read(256)
+            data = f.read(256)
             if not data:
                 break
             yield data
         yield   '"}}'
-    return Response(generator(packageMetadata, result[2], data), content_type='application/json')
+    return Response(generator(packageMetadata, result[2], base64PackagePath), content_type='application/json')
 
 #? This will replace the current ID with a new package 
 #? version (update), as long as ID, version, and name match.
