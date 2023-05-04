@@ -82,7 +82,8 @@ def main(link):
         print(f'The package could not be rated by ID, due to an error code {response.status_code}\n')
     
     #TODO Testing (Packages Fetch)
-    response = requests.post(link + "/packages", headers=header)
+    response = requests.post(link + "/packages", headers=header, json={'PackageNames': ['*'],
+                                                                       'SemverRange': '1.36.4'})
     if(response.status_code == 200):
         print(f'Packages Fetch Test: {response.json()}\n')
     else:

@@ -393,7 +393,7 @@ def PackageByNameDelete(name=None):
     exist = exists(table.c.PackageName, name)
     if exist is False:
        return jsonify({'status_code': '404',
-                        'message': 'Package doesn\'t exist 7.'}), 404, {'content_type': 'application/json'}
+                        'message': 'Package doesn\'t exist.'}), 404, {'content_type': 'application/json'}
 
     # Then, use SQL commands to delete package
     query = db.delete(table).where(table.c.PackageName == name)
@@ -417,7 +417,7 @@ def PackageByNameGet(name=None):
     exist = exists(table.c.PackageName, name)
     if exist is False:
        return jsonify({'status_code': '404',
-                        'message': 'Package doesn\'t exist 8.'}), 404, {'content_type': 'application/json'}
+                        'message': 'Package doesn\'t exist.'}), 404, {'content_type': 'application/json'}
     
     # Then, use SQL commands to obtain when the package was entered into the SQL database
     query = db.select(table.c.LastModified).where(table.c.PackageName == name)
@@ -442,7 +442,7 @@ def PackageDelete(id=None):
     exist = exists(table.c.ID, id)
     if exist is False:
        return jsonify({'status_code': '404',
-                        'message': 'Package doesn\'t exist 1.'}), 404, {'content_type': 'application/json'}
+                        'message': 'Package doesn\'t exist.'}), 404, {'content_type': 'application/json'}
     
     # Then, delete package from SQL database
     query = db.delete(table).where(table.c.ID == id)
@@ -467,7 +467,7 @@ def PackageRetrieve(id=None):
     exist = exists(table.c.ID, id)
     if exist is False:
        return jsonify({'status_code': '404',
-                        'message': 'Package doesn\'t exist 2.'}), 404, {'content_type': 'application/json'}
+                        'message': 'Package doesn\'t exist.'}), 404, {'content_type': 'application/json'}
     
     # Obtain the URL from the database
     query = db.select(table.c["PackageName", "Version", "PackageLink"]).where(table.c.ID == id)
@@ -505,31 +505,31 @@ def PackageUpdate(id=None):
     print("Autograder input: {}".format(data), file = stderr)
     
     # Then, check that there is an ID, name, and version provided
-    if not data["id"]:
+    if not data["ID"] or data["ID"] == None:
         return jsonify({'status_code': '400',
-                        'message': 'There are missing field(s) in the request body. There must be an \'id\', \'name\', and \'version\'.'}), 400, {'content_type': 'application/json'}
-    elif not data["name"]:
+                        'message': 'There are missing field(s) in the request body. There must be an \'ID\', \'Name\', and \'Version\'.'}), 400, {'content_type': 'application/json'}
+    elif not data["Name"] or data["Name"] == None:
         return jsonify({'status_code': '400',
-                        'message': 'There are missing field(s) in the request body. There must be an \'id\', \'name\', and \'version\'.'}), 400, {'content_type': 'application/json'}
-    elif not data["version"]:
+                        'message': 'There are missing field(s) in the request body. There must be an \'ID\', \'Name\', and \'Version\'.'}), 400, {'content_type': 'application/json'}
+    elif not data["Version"] or data["Version"] == None:
         return jsonify({'status_code': '400',
-                        'message': 'There are missing field(s) in the request body. There must be an \'id\', \'name\', and \'version\'.'}), 400, {'content_type': 'application/json'}
+                        'message': 'There are missing field(s) in the request body. There must be an \'ID\', \'Name\', and \'Version\'.'}), 400, {'content_type': 'application/json'}
     
     # Then, check if id/name/version match in database. Start with id, then check name and version associated with that id, else return error 404
     query = db.select(table.c["ID", "PackageName", "Version"]).where(table.c.ID == id)
     return_list = connection.execute(query).fetchone()
 
-    if return_list[0] != data["id"]:
+    if return_list[0] != data["ID"]:
         return jsonify({'status_code': '404',
-                        'message': 'Package does not exist 3. There must be an \'id\', \'name\', and \'version\'.'}), 404, {'content_type': 'application/json'}
+                        'message': 'Package does not exist. There must be an \'id\', \'name\', and \'version\'.'}), 404, {'content_type': 'application/json'}
     
-    if return_list[1] != data["name"]:
+    if return_list[1] != data["Name"]:
         return jsonify({'status_code': '404',
-                        'message': 'Package does not exist 4. There must be an \'id\', \'name\', and \'version\'.'}), 404, {'content_type': 'application/json'}
+                        'message': 'Package does not exist. There must be an \'id\', \'name\', and \'version\'.'}), 404, {'content_type': 'application/json'}
 
-    if return_list[2] != data["version"]:
+    if return_list[2] != data["Version"]:
         return jsonify({'status_code': '404',
-                        'message': 'Package does not exist 5. There must be an \'id\', \'name\', and \'version\'.'}), 404, {'content_type': 'application/json'}
+                        'message': 'Package does not exist. There must be an \'id\', \'name\', and \'version\'.'}), 404, {'content_type': 'application/json'}
     
     # Update the values for the id
     subprocess.run(["python3", "sql/upload.py"])
@@ -552,7 +552,7 @@ def PackageRate(id=None):
     exist = exists(table.c.ID, id)
     if exist is False:
        return jsonify({'status_code': '404',
-                        'message': 'Package doesn\'t exist 6.'}), 404, {'content_type': 'application/json'}
+                        'message': 'Package doesn\'t exist.'}), 404, {'content_type': 'application/json'}
     
     # Then, obtain the scores from the SQL database
     query = db.select(table.c["BusFactor", "Correctness", "Pinning", "Licensing", "NetScore", "UpdatedCode", "RampUp", "Responsiveness"]).where(table.c.ID == id)
@@ -577,8 +577,76 @@ def PackageRate(id=None):
 #! No idea how to do this currently, must examine later
 @app.route('/packages', methods=["POST"])
 def PackagesList():
+    # First, check that the query is provided
+    data = json.loads(request.data)
+    print("Autograder input: {}".format(data), file = stderr)
+    
+    if not data["SemverRange"] or data["SemverRange"] == None:
+        return jsonify({'status_code': '400',
+                        'message': 'There are missing fields in the PackageQuery'}), 400, {'content_type': 'application/json'}
+    if not data["PackageNames"] or data["PackageNames"] == None:
+        return jsonify({'status_code': '400',
+                        'message': 'There are missing fields in the PackageQuery'}), 400, {'content_type': 'application/json'}
+    
+    packageList = []
+    
+    # Grab the range of version to allow
+    providedRange = data["SemverRange"]
+    if providedRange.find('-') != -1:
+        lowerBound = providedRange.split('-')[0]
+        upperBound = providedRange.split('-')[1]
+    elif providedRange.find('^') != -1:
+        lowerBound = providedRange.split('^')[0]
+        upperBound = providedRange.split('^')[0]
+    elif providedRange.find('~') != -1:
+        lowerBound = providedRange.split('~')[0]
+        upperBound = providedRange.split('~')[0]
+    else:
+        lowerBound = providedRange
+        upperBound = providedRange
+        
+    # Check if need to get all by searching if first element is '*'
+    if data["PackageNames"][0] == '*':
+         # Otherwise, perform search function through SQL database
+        t = sqlalchemy.text("SELECT * FROM Packages")
+        result = connection.execute(t)
+        
+        # Do something with the results
+        for row in result:
+            obtainedVersion = row[13]
+            numericValues = obtainedVersion.split('.')
+            # Check major number
+            if numericValues[0] >= lowerBound.split('.')[0] and numericValues[0] <= upperBound.split('.')[0]:
+                # Check next
+                if numericValues[1] >= lowerBound.split('.')[1] and numericValues[1] <= upperBound.split('.')[1]:
+                    # Check final
+                    if numericValues[2] >= lowerBound.split('.')[2] and numericValues[2] <= upperBound.split('.')[2]:
+                        packageList.append({'Name': row[0], 'ID': row[11], 'Version': row[13]})
+    elif not data["PackageNames"]:
+        return jsonify({'status_code': '413',
+                        'message': 'Too many packages to return. Please specify a PackageQuery.'}), 413, {'content_type': 'application/json'}
+    else:
+        for package in data["PackageNames"]:
+            if exists(table.c.PackageName, package):
+                query = db.select(table.c["PackageName", "ID", "Version"]).where(table.c.PackageName == package)
+                result = connection.execute(query).fetchone()
+                numericValues = result[2].split('.')
+                if numericValues[0] >= lowerBound.split('.')[0] and numericValues[0] <= upperBound.split('.')[0]:
+                    # Check next
+                    if numericValues[1] >= lowerBound.split('.')[1] and numericValues[1] <= upperBound.split('.')[1]:
+                        # Check final
+                        if numericValues[2] >= lowerBound.split('.')[2] and numericValues[2] <= upperBound.split('.')[2]:
+                            packageList.append({'Name': result[0], 'ID': result[1], 'Version': result[2]})
+        
+    
+    # Check if for no matches for SemverRange were found
+    if not packageList:
+        return jsonify({'status_code': '404', 
+                        'message': 'No packages could be obtained within the provided SemverRange.'}), 404, {'content_type': 'application/json'}
+    
     return jsonify({'status_code': '200',
-                    'message': 'This is a test, must implement later'}), 200, {'content_type': 'application/json'}
+                    'message': 'Obtained a list of packages. Check the \'metadata\' field for the list.',
+                    'metadata': packageList}), 200, {'content_type': 'application/json'}
 
 #? This is the SQL reset. Resets the SQL database to a 
 #? default state.

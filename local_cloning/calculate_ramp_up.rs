@@ -120,7 +120,7 @@ fn main(){
         else{
             write!(log2, "\nNo Javascript in folder {}\n", folder_num).expect("Error writing to log");
             
-            write!(out_file, "0.0\n").expect("Error writing rampup to output");
+            write!(out_file, "0.5\n").expect("Error writing rampup to output");
         }
         //increment the folder counter
         folder_num+=1;
