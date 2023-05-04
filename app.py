@@ -331,11 +331,10 @@ def PackageCreate():
                 'Name': f'{os.path.basename(obtainedURL)}',
                 'Version': f'{version}'}
     
-    # Form the data return field. Contains the Base64 package and URL
-    zipPackageName, base64PackageName = createEncodedFile(obtainedURL)
-    with open(base64PackageName, 'rb') as encodedPackage:
-        packageData = {'Content': f'{encodedPackage.read()}',
-                       'URL': f'{obtainedURL}'}
+    # Form the data return field. Contains the URL
+    packageData = {'Content': None,
+                    'URL': f'{obtainedURL}',
+                    'JSProgram': None}
 
     # Return success
     return jsonify({'status_code': '201',
