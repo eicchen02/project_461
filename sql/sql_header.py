@@ -81,7 +81,6 @@ if __name__ == "__main__":
     result_row = connection.execute(query)
     result = result_row.fetchone()
     print(table.columns.keys())
-    for i in range(len(result)):
-        print(result[i])
+
 
 
