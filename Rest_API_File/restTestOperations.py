@@ -61,7 +61,7 @@ def main(link):
     response = requests.get(link + "/package/" + id, headers=header)
     if(response.status_code == 200):
         if response.json()["data"]["Content"] != None:
-            print(f'Package By ID Retrieve Test: Content field set\n')
+            print(f'Package By ID Retrieve Test: Content field set {response.json()["data"]["Content"]}\n')
         else:
             print("Package By ID Retrieve Test: Obtained 200, but not 'Content' field\n")
     else:

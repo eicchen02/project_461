@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file, Response
 import connexion
 import json
 import subprocess
@@ -474,18 +474,21 @@ def PackageRetrieve(id=None):
     
     # Then, convert package into base64/obtain base64 package for PackageData type field
     zipPackagePath, base64PackagePath = createEncodedFile(result[2])
-    with open(base64PackagePath, 'rb') as data:
-        packageData = {'URL': f'{result[2]}',
-                       'Content': f'{data.read()}'}
+    data = open(base64PackagePath, 'rb')
     packageMetadata = {'ID': f'{id}',
                        'Name': f'{result[0]}',
                        'Version': f'{result[1]}'}
     
     # Return success
-    return jsonify({'status_code': '200',
-                    'message': 'Success. The package has been obtained by ID.',
-                    'data': packageData,
-                    'metadata': packageMetadata}), 200, {'content_type': 'application/json'}
+    def generator(packageMetadata, URL, ContentFile):
+        yield  '{"status_code": "200", "message": "Success. The package has been obtained by ID.", "metadata": ' + json.dumps(packageMetadata) + ', "data": {"URL": "' + URL + '", "Content": "'
+        while True:
+            data = ContentFile.read(256)
+            if not data:
+                break
+            yield data
+        yield   '"}}'
+    return Response(generator(packageMetadata, result[2], data), content_type='application/json')
 
 #? This will replace the current ID with a new package 
 #? version (update), as long as ID, version, and name match.
