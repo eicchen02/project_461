@@ -561,7 +561,7 @@ def PackageRate(id=None):
     # Then, need to format scores according to the PackageRating definition in the YAML and return 200 and PackageRating if successful
     packageRatings = {'BusFactor': f'{result[0]}',
                   'Correctness': f'{result[1]}',
-                  'GoodPinninPractice': f'{result[2]}',
+                  'GoodPinningPractice': f'{result[2]}',
                   'LicenseScore': f'{result[3]}',
                   'NetScore': f'{result[4]}',
                   'PullRequest': f'{result[5]}',
