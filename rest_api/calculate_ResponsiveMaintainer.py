@@ -1,183 +1,38 @@
-import requests as rq
+O='https://github.com/'
+B='\n'
+I=str
+F=open
+E=int
+import requests as Q
 from pprint import pprint
-import sys
-import json
-import datetime as dt
-import os
-
-MAXNUMOPEN = 1000
-UPDATEDECAY = 1.1
-
-
-def getResponsiveScore(githubRepoURL):
-
-    repoDir = githubRepoURL.split("https://github.com/")[1]
-
-    # format each github url for the REST api
-    # we want to get the number of open and closed issues in the repo
-
-    openURL = "https://api.github.com/repos/" + repoDir
-
-    github_token = os.getenv("GITHUB_TOKEN")
-
-    file_v2 = open("log/logv1.txt", "a+")
-    file_v3 = open("log/logv2.txt", "a+")
-
-    file_v2.write("\n\n>>> beginning respmaintainer metric with REST api\n")
-
-    file_v3.write("\n\n------------------\n")
-    file_v3.write(
-        "current analysis of responsive maintainer metric will be done with github REST api\n"
-    )
-    file_v3.write(
-        "beginning retrieval of information from repository %s\n" % githubRepoURL
-    )
-    file_v3.write("------------------\n")
-
-
-    headers = {
-        "Authorization": f"token {github_token}"
-    }  # build the header for authentication
-   
-    # get a response using the REST API
-    openResp = rq.get(url=openURL, headers=headers)
-    # if the response is successful, get the issue numbers
-    if openResp.status_code == 200:
-        file_v2.write("able to receive response from github\n")
-        file_v3.write(
-            "able to receive response code %d from github\n" % openResp.status_code
-        )
-
-        # test if the repos contain the correct data in json format
-        try:
-            respJson = openResp.json()
-
-            hasIssues = respJson["has_issues"]
-            openNum = int(respJson["open_issues_count"])
-
-            updatedDate = respJson["updated_at"]
-            updatedDate = updatedDate.split("-")
-            year = int(updatedDate[0])
-            month = int(updatedDate[1])
-            day = int(updatedDate[2].split("T")[0])
-            updatedDate = dt.date(year, month, day)
-
-            file_v2.write("proper repo format - data retrieval successful\n")
-            file_v3.write(
-                "proper repo format - retrieved %s from the api\n" % updatedDate
-            )
-
-        except:
-            file_v2.write("improper repo format")
-            file_v3.write(
-                "improper repo format- investigate repo at %s \n" % githubRepoURL
-            )
-
-            return -1
-
-        # calculate ratio of open to closed requests for score
-
-        score = 0
-
-        if hasIssues == True:
-            file_v2.write("repo had nonzero number of issues\n")
-            file_v3.write("repo had more than 0 issues = True\n")
-            score += 0.05
-
-        if openNum > 25:
-            file_v2.write("number of open issues exceeded threshold\n")
-            file_v3.write("number of open issues exceeded threshold of 25\n")
-            score += min(0.2, 0.2 * ((MAXNUMOPEN - openNum) / MAXNUMOPEN))
-
-        elapsedTime = str(dt.date.today() - updatedDate)
-        if elapsedTime == "0:00:00":
-            file_v2.write("repo was updated today\n")
-            file_v3.write(
-                "repo was updated today, i.e. day difference was %s\n" % elapsedTime
-            )
-            elapsedTime = 0
-        else:
-            elapsedTime = int(elapsedTime.split(" ")[0])
-            file_v2.write("repo was not updated today\n")
-            file_v3.write(
-                "repo was not updated today, it was updated %d days ago\n" % elapsedTime
-            )
-            if elapsedTime < 0:
-                elapsedTime = 0
-
-        score += 0.75 * (UPDATEDECAY ** (-1 * elapsedTime))
-
-        file_v3.write(
-            "responsive maintainer score was calculated to be %f with decay factor %f\n"
-            % (score, UPDATEDECAY)
-        )
-
-        file_v2.close()
-        file_v3.close()
-
-        return score
-
-    # return invalid score if not able to get repo information
-    else:
-        # print('failed to resolve repository: ',githubRepoURL,' as ',openURL)
-        # print('openResp.status_code: ',openResp.status_code)
-        file_v2.write("failed to resolve repository\n")
-        file_v3.write(
-            "failed to resolve repository with response code %d from github\n"
-            % openResp.status_code
-        )
-
-        file_v2.close()
-        file_v3.close()
-        return -1
-
-
-def getGithubURLs(repo):
-
-    names = []
-    repoName = repo.partition("github.com/")[2]  # extract "owner/repo"
-
-    if not repoName:  # if github.com/ is not found, extract as npmjs package
-        url = os.path.basename(repo.strip("\n"))
-        with open(f"local_cloning/cloned_repos/{url}/package.json") as json_File:
-            npmsRepo = json.load(json_File)  # load json file containing repo info
-            repoName = npmsRepo["repository"]  # extract repo info
-
-        if not isinstance(repoName, str):  # if a dict is returned instead of str
-            repoName = list(repoName.values())[1]  # extract url from dict
-            repoName = repoName.partition("github.com/")[2].replace(
-                ".git", ""
-            )  # extract "owner/repo"
-
-    names.append(
-        (repoName.partition("/")[0],repoName.partition("/")[2].replace("\n",""))
-    )  # append (owner, repo)
-
-    # convert all repos to github urls
-
-    for r in names:
-        currLink = "https://github.com/" + r[0] + "/" + r[1]
-        gitLink = currLink
-
-    # return list of github urls
-    return gitLink
-
-
-def main():
-
-    # read in data from test file
-    url = sys.argv[1]
-
-    # convert any npm repos to github
-    gitURL = getGithubURLs(url)
-
-    # find and print the responsive maintainer metric for each repo
-    with open("output/resp_maintain_out.txt", "w") as f:
-        currScore = getResponsiveScore(gitURL)
-        # print('\nResponsive Maintainer score for repo: ', u, '\nis: ',currScore,'\n')
-        f.write(str(currScore))
-        f.write("\n")
-
-
-if __name__ == "__main__":
-    main()
+import sys,json,datetime as L,os
+M=1000
+N=1.1
+def C(githubRepoURL):
+	J=githubRepoURL;R=J.split(O)[1];S='https://api.github.com/repos/'+R;T=os.getenv('GITHUB_TOKEN');B=F('log/logv1.txt','a+');A=F('log/logv2.txt','a+');B.write('\n\n>>> beginning respmaintainer metric with REST api\n');A.write('\n\n------------------\n');A.write('current analysis of responsive maintainer metric will be done with github REST api\n');A.write('beginning retrieval of information from repository %s\n'%J);A.write('------------------\n');U={'Authorization':f"token {T}"};G=Q.get(url=S,headers=U)
+	if G.status_code==200:
+		B.write('able to receive response from github\n');A.write('able to receive response code %d from github\n'%G.status_code)
+		try:K=G.json();Y=K['has_issues'];P=E(K['open_issues_count']);D=K['updated_at'];D=D.split('-');V=E(D[0]);W=E(D[1]);X=E(D[2].split('T')[0]);D=L.date(V,W,X);B.write('proper repo format - data retrieval successful\n');A.write('proper repo format - retrieved %s from the api\n'%D)
+		except:B.write('improper repo format');A.write('improper repo format- investigate repo at %s \n'%J);return-1
+		H=0
+		if P>25:B.write('number of open issues exceeded threshold\n');A.write('number of open issues exceeded threshold of 25\n');H+=min(.2,.2*((M-P)/M))
+		C=I(L.date.today()-D)
+		if C=='0:00:00':B.write('repo was updated today\n');A.write('repo was updated today, i.e. day difference was %s\n'%C);C=0
+		else:
+			C=E(C.split(' ')[0]);B.write('repo was not updated today\n');A.write('repo was not updated today, it was updated %d days ago\n'%C)
+			if C<0:C=0
+		H+=.75*N**(-1*C);A.write('responsive maintainer score was calculated to be %f with decay factor %f\n'%(H,N));B.close();A.close();return H
+	else:B.write('failed to resolve repository\n');A.write('failed to resolve repository with response code %d from github\n'%G.status_code);B.close();A.close();return-1
+def D(repo):
+	G='github.com/';C='/';D=[];A=repo.partition(G)[2]
+	if not A:
+		H=os.path.basename(repo.strip(B))
+		with F(f"local_cloning/cloned_repos/{H}/package.json")as J:K=json.load(J);A=K['repository']
+		if not isinstance(A,I):A=list(A.values())[1];A=A.partition(G)[2].replace('.git','')
+	D.append((A.partition(C)[0],A.partition(C)[2].replace(B,'')))
+	for E in D:L=O+E[0]+C+E[1];M=L
+	return M
+def A():
+	E=sys.argv[1];G=D(E)
+	with F('output/resp_maintain_out.txt','w')as A:H=C(G);A.write(I(H));A.write(B)
+if __name__=='__main__':A()

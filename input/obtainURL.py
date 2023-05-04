@@ -1,41 +1,16 @@
-import base64
-import zipfile
-import sys
-import json
-import os
-from urllib.parse import urlparse
-
-def main():
-    input = sys.argv[1]
-    try:
-        data = open(input, 'r').read()
-        if(base64.b64encode(base64.b64decode(data))):  # Test to see if can encode/decode the input -> Encoded file
-            # If Encoded, first decode, then obtain the URL from the package.json file, if it exists
-            with open('temp.zip', 'wb') as result:
-                result.write(base64.b64decode(data))
-            zip_ref = zipfile.ZipFile('./temp.zip', 'r')
-            zip_ref.extractall('local_cloning/cloned_repos/')
-            zip_ref.close()
-            
-            relativepath, = zipfile.Path(zip_ref).iterdir()
-            
-            os.remove("temp.zip")
-            
-            # Find the URL file from package.json
-            package = open(f'local_cloning/cloned_repos/{relativepath.name}/package.json')
-            jsonData = json.load(package)
-            if "url" in jsonData["repository"]:
-                # URL exists in package
-                url = jsonData["repository"]["url"]
-                netloc = urlparse(url).scheme + '://' + urlparse(url).netloc
-                path = urlparse(url).path
-                print(netloc + os.path.splitext(path)[0])
-            else:
-                #! Should return error 400 through REST API, once it has been set up
-                print("-1")
-    except:  # Otherwise, it's just a URL
-        with open(input, 'r') as data:
-            print(data.read())
-
-if __name__ == "__main__":
-    main()
+E=print
+A=open
+import base64 as C,zipfile as I,sys,json,os
+from urllib.parse import urlparse as D
+def B():
+	M='repository';L='url';K='temp.zip';H='r';input=sys.argv[1]
+	try:
+		B=A(input,H).read()
+		if C.b64encode(C.b64decode(B)):
+			with A(K,'wb')as N:N.write(C.b64decode(B))
+			F=I.ZipFile('./temp.zip',H);F.extractall('local_cloning/cloned_repos/');F.close();O,=I.Path(F).iterdir();os.remove(K);P=A(f"local_cloning/cloned_repos/{O.name}/package.json");J=json.load(P)
+			if L in J[M]:G=J[M][L];Q=D(G).scheme+'://'+D(G).netloc;R=D(G).path;E(Q+os.path.splitext(R)[0])
+			else:E('-1')
+	except:
+		with A(input,H)as B:E(B.read())
+if __name__=='__main__':B()

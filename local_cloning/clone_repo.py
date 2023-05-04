@@ -1,50 +1,22 @@
-from git import Repo  # import git library
-import sys  # import sys to use command line arguments
-import os
-import re
-import urllib.request as u
+I='finished cloning url #'
+H=Exception
+E='local_cloning/cloned_repos/'
+from git import Repo as F
+import sys,os as A,re,urllib.request as J
 from subprocess import DEVNULL
-
-# open the command line argument file
-url = sys.argv[1]
-
-# make a directory named 'cloned_repos' to put the cloned repos in
-os.mkdir("local_cloning/cloned_repos/")
-
-log1 = open("log/logv1.txt", "w")
-log2 = open("log/logv2.txt", "w")
-
-# if it was a git URL, clone it
-if "github" in url:
-
-    # clone the current git URL into a directory named after the current url_num value
-    Repo.clone_from(url, "local_cloning/cloned_repos/" + os.path.basename(url) + "/")
-
-    # print status update
-    # print("finished cloning url #" + str(url_num))
-    log1.write("finished cloning url #" + str(os.path.basename(url)) + "\n")
-
-# if it was not a git URL, that means it was an npm URL
+B=sys.argv[1]
+A.mkdir(E)
+C=open('log/logv1.txt','w')
+K=open('log/logv2.txt','w')
+if'github'in B:F.clone_from(B,E+A.path.basename(B)+'/');C.write(I+str(A.path.basename(B))+'\n')
 else:
-
-    webUrl = u.urlopen(url)
-    if webUrl.getcode() == 200:
-        html_cont = webUrl.read().decode("utf-8")
-        r1 = r'<span id="repository-link">(.*?)<\/span>'
-        try:
-            reg_out = re.search(r1, html_cont)
-            gitLink = "https://" + reg_out.group(1)
-        except:
-            raise Exception("Valid GitHub link not found.\n")
-    else:
-        raise Exception("npm url not able to connect.\n")
-    
-    # clone the current git URL into a directory named after the current url_num value
-    Repo.clone_from(gitLink, "local_cloning/cloned_repos/" + os.path.basename(gitLink) + "/")
-    
-    # print status update
-    log1.write("finished cloning url #" + os.path.basename(gitLink) + "\n")
-
-log1.close()
-log2.close()
+	G=J.urlopen(B)
+	if G.getcode()==200:
+		L=G.read().decode('utf-8');M='<span id="repository-link">(.*?)<\\/span>'
+		try:N=re.search(M,L);D='https://'+N.group(1)
+		except:raise H('Valid GitHub link not found.\n')
+	else:raise H('npm url not able to connect.\n')
+	F.clone_from(D,E+A.path.basename(D)+'/');C.write(I+A.path.basename(D)+'\n')
+C.close()
+K.close()
 exit(0)

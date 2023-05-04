@@ -1,101 +1,31 @@
-"""
-Name: Matthew Nale
-	Date of Last Edit: 3/25/2023
-
-	Purpose: Obtains amount of files introduced through pull requests
-
-	Details: Using the PyGithub API, obtains the needed information for the total commit changes from pull requests over the total number of changes
-
-"""
-import requests
-import urllib.request as url
-import re
-import sys
-import os
-
-
-def getGithubURLs(repo):
-    webUrl = url.urlopen(repo)
-    if webUrl.getcode() == 200:
-        html_cont = webUrl.read().decode("utf-8")
-        r1 = r'<span id="repository-link">(.*?)<\/span>'
-        try:
-            reg_out = re.search(r1, html_cont)
-            gitLink = "https://" + reg_out.group(1)
-        except:
-            raise Exception("Valid GitHub link not found.\n")
-    else:
-        raise Exception("npm url not able to connect.\n")
-    return gitLink
-
-
-def main():
-    givenUrl = sys.argv[1]
-    if givenUrl == "":
-        print("0.0")
-        return
-
-    if "npmjs.com/" in givenUrl:
-        gitURL = getGithubURLs(givenUrl)
-    else:
-        gitURL = givenUrl
-
-    github_token = os.environ.get("GITHUB_TOKEN")
-    names = (gitURL.split("github.com/", 1)[1]).split("/")
-    
-    headers = {"Authorization": f"Bearer {github_token}"}
-
-    query = """
-    {
-      repository(owner: "%s", name: "%s") {
-        pullRequests(states: MERGED, last: 100) {
-          nodes {
-            additions
-          }
-        }
-        commitComments(last: 100) {
-          nodes {
-            commit {
-              additions
-            }
-          }
-        }
-      }
-    }
-    """ % (
-	names[0],
-	names[1]
-    )
-
-    json = {"query": query}
-
-    response = requests.post(url="https://api.github.com/graphql", json=json, headers=headers)
-    if response.status_code == 200:
-        try:
-            newCode = 0
-            totalCommits = 0
-            for pull in response.json()["data"]["repository"]["pullRequests"]["nodes"]:
-                try:
-                    newCode += pull["additions"]
-                except:
-                    newCode += 0
-            for commit in response.json()["data"]["repository"]["commitComments"][
-		    "nodes"
-	    ]:
-                try:
-                  totalCommits += commit["commit"]["additions"]
-                except:
-                  totalCommits += 0
-        except:
-            newCode = 0
-            totalCommits = 1
-        if(newCode == 0 and totalCommits == 0):
-              print("0.0")
-        else:
-          print(f"{round(newCode/(newCode + totalCommits), 2)}")
-    else:
-        print("0.0")
-
-
-if __name__ == "__main__":
-    main()
+A=Exception
+C=print
+import requests as M,urllib.request as D,re,sys,os
+def N(repo):
+	B=D.urlopen(repo)
+	if B.getcode()==200:
+		C=B.read().decode('utf-8');E='<span id="repository-link">(.*?)<\\/span>'
+		try:F=re.search(E,C);G='https://'+F.group(1)
+		except:raise A('Valid GitHub link not found.\n')
+	else:raise A('npm url not able to connect.\n')
+	return G
+def B():
+	L='additions';K='nodes';J='repository';I='data';F='0.0';D=sys.argv[1]
+	if D=='':C(F);return
+	if'npmjs.com/'in D:G=N(D)
+	else:G=D
+	O=os.environ.get('GITHUB_TOKEN');H=G.split('github.com/',1)[1].split('/');P={'Authorization':f"Bearer {O}"};Q='\n    {\n      repository(owner: "%s", name: "%s") {\n        pullRequests(states: MERGED, last: 100) {\n          nodes {\n            additions\n          }\n        }\n        commitComments(last: 100) {\n          nodes {\n            commit {\n              additions\n            }\n          }\n        }\n      }\n    }\n    '%(H[0],H[1]);R={'query':Q};E=M.post(url='https://api.github.com/graphql',json=R,headers=P)
+	if E.status_code==200:
+		try:
+			A=0;B=0
+			for S in E.json()[I][J]['pullRequests'][K]:
+				try:A+=S[L]
+				except:A+=0
+			for T in E.json()[I][J]['commitComments'][K]:
+				try:B+=T['commit'][L]
+				except:B+=0
+		except:A=0;B=1
+		if A==0 and B==0:C(F)
+		else:C(f"{round(A/(A+B),2)}")
+	else:C(F)
+if __name__=='__main__':B()

@@ -1,29 +1,21 @@
-import re
-import os
+import re,os as A
 from pathlib import Path
-
-readme_patterns = [re.compile("(?i)README.md"), re.compile("(?i)README.txt")]
-license_pattern = re.compile("(?i)license")
-found = 0
-
-# sorry about this one
-rootdir = "local_cloning/cloned_repos/"
-with open("output/license_out.txt", "w") as f:
-    for file in os.listdir(rootdir):
-        d = os.path.join(rootdir, file)
-        if os.path.isdir(d):
-            found = 0
-            for root, dirs, files in os.walk(d):
-                for x in files:
-                    for readme_pattern in readme_patterns:
-                        if readme_pattern.match(x) and found == 0:
-                            valid_readme_file = os.path.join(root, x)
-                            with open(valid_readme_file, "r") as readme:
-                                text = readme.read()
-                                if "license" or "LICENSE" or "License" in text:
-                                    f.write(str(1.0))
-                                    f.write("\n")
-                                else:
-                                    f.write(str(0.0))
-                                    f.write("\n")
-                                found = 1
+G=[re.compile('(?i)README.md'),re.compile('(?i)README.txt')]
+O=re.compile('(?i)license')
+C=0
+D='local_cloning/cloned_repos/'
+with open('output/license_out.txt','w')as B:
+	for H in A.listdir(D):
+		E=A.path.join(D,H)
+		if A.path.isdir(E):
+			C=0
+			for(I,P,J)in A.walk(E):
+				for F in J:
+					for K in G:
+						if K.match(F)and C==0:
+							L=A.path.join(I,F)
+							with open(L,'r')as M:
+								N=M.read()
+								if'license'or'LICENSE'or'License'in N:B.write(str(1.));B.write('\n')
+								else:B.write(str(.0));B.write('\n')
+								C=1
