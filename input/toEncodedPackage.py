@@ -1,60 +1,25 @@
-import base64
-import sys
-import os
-from git import Repo
-import urllib.request as u
-import re
-import zipfile
-
-def createEncodedFile(url):
-    # Grabs the package URL passed in
-    packageURL = url
-    
-    # Check if the 'encoded_repos' filepath exists, and makes it if not
-    if not os.path.exists('./local_cloning/encoded_repos'):
-        os.makedirs('./local_cloning/encoded_repos')
-    
-    # Checks if the package is already downloaded locally to prevent redownloads
-    path = f'./local_cloning/cloned_repos/{os.path.basename(packageURL)}/'
-
-    # Download the package if it does not exist
-    if not os.path.exists(path):
-        if "github" in packageURL:
-            # Clone the github package
-            Repo.clone_from(packageURL, "./local_cloning/cloned_repos/" + os.path.basename(packageURL) + "/")
-        # If it was not a 'github.com' package (NPM)
-        else:
-            webUrl = u.urlopen(packageURL)
-            if webUrl.getcode() == 200:
-                html_cont = webUrl.read().decode("utf-8")
-                r1 = r'<span id="repository-link">(.*?)<\/span>'
-                try:
-                    reg_out = re.search(r1, html_cont)
-                    gitLink = "https://" + reg_out.group(1)
-                except:
-                    raise Exception("Valid GitHub link not found.\n")
-            else:
-                raise Exception("npm url not able to connect.\n")
-        
-            # clone the current git URL into a directory named after the current url_num value
-            Repo.clone_from(gitLink, "./local_cloning/cloned_repos/" + os.path.basename(gitLink) + "/")
-
-    # After making sure package is cloned, loop through and zip the entire directory
-    zipf = zipfile.ZipFile(f'./local_cloning/encoded_repos/{os.path.basename(packageURL)}.zip', 'w', zipfile.ZIP_DEFLATED)
-    for root, dirs, files in os.walk(path):
-        zipf.write(root)
-        for file in files:
-            zipf.write(os.path.join(os.path.relpath(root), file),
-                       arcname=os.path.join(root.replace(f'local_cloning/cloned_repos/{os.path.basename(packageURL)}', ""), file))
-    
-    zipf.close()
-    
-    # Now Base64 encode the file
-    with open(f'./local_cloning/encoded_repos/{os.path.basename(packageURL)}.zip', 'rb') as fin, open(f'./local_cloning/encoded_repos/{os.path.basename(packageURL)}_base64', 'wb') as fout:
-        encoded = base64.b64encode(fin.read())
-        fout.write(encoded)
-    
-    # Finally, return the base64 and zip filename that has been created
-    zipName = f'./local_cloning/encoded_repos/{os.path.basename(packageURL)}.zip'
-    encodedName = f'./local_cloning/encoded_repos/{os.path.basename(packageURL)}_base64'
-    return zipName, encodedName
+G=Exception
+import base64 as N,sys,os as A
+from git import Repo as E
+import urllib.request as O,re,zipfile as F
+def B(url):
+	M='./local_cloning/cloned_repos/';L='./local_cloning/encoded_repos';B=url
+	if not A.path.exists(L):A.makedirs(L)
+	H=f"./local_cloning/cloned_repos/{A.path.basename(B)}/"
+	if not A.path.exists(H):
+		if'github'in B:E.clone_from(B,M+A.path.basename(B)+'/')
+		else:
+			I=O.urlopen(B)
+			if I.getcode()==200:
+				P=I.read().decode('utf-8');Q='<span id="repository-link">(.*?)<\\/span>'
+				try:R=re.search(Q,P);J='https://'+R.group(1)
+				except:raise G('Valid GitHub link not found.\n')
+			else:raise G('npm url not able to connect.\n')
+			E.clone_from(J,M+A.path.basename(J)+'/')
+	C=F.ZipFile(f"./local_cloning/encoded_repos/{A.path.basename(B)}.zip",'w',F.ZIP_DEFLATED)
+	for(D,Y,S)in A.walk(H):
+		C.write(D)
+		for K in S:C.write(A.path.join(A.path.relpath(D),K),arcname=A.path.join(D.replace(f"local_cloning/cloned_repos/{A.path.basename(B)}",''),K))
+	C.close()
+	with open(f"./local_cloning/encoded_repos/{A.path.basename(B)}.zip",'rb')as T,open(f"./local_cloning/encoded_repos/{A.path.basename(B)}_base64",'wb')as U:V=N.b64encode(T.read());U.write(V)
+	W=f"./local_cloning/encoded_repos/{A.path.basename(B)}.zip";X=f"./local_cloning/encoded_repos/{A.path.basename(B)}_base64";return W,X

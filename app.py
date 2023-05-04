@@ -1,674 +1,224 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file, Response
-import connexion
-import json
-import subprocess
-import os
+_A0='/package/byName/<name>'
+_z='Package is deleted'
+_y="Package name cannot be 'None'."
+_x='SELECT * FROM Packages'
+_w='metadata'
+_v='download_status_details'
+_u='download_status'
+_t='rate_status_details'
+_s='Pinning'
+_r='Licensing'
+_q='UpdatedCode'
+_p='Responsiveness'
+_o='PackageLink'
+_n='No such package exists!'
+_m='Package is not uploaded due to a disqualified rating.\nEvery metric must score greater than 0.5'
+_l='npmjs.com'
+_k='github.com'
+_j='/package/<id>'
+_i='There must be an ID value in order to delete packages'
+_h='DELETE'
+_g='data'
+_f='NetScore'
+_e='RampUp'
+_d='BusFactor'
+_c='Correctness'
+_b='update_status'
+_a='upload'
+_Z='./run'
+_Y='upload_status'
+_X='Autograder input: {}'
+_W='PackageName'
+_V='rate_status'
+_U='update_status_details'
+_T='sql/upload.py'
+_S='python3'
+_R="Package doesn't exist."
+_Q='upload_status_details'
+_P='output/output.json'
+_O='200'
+_N='Name'
+_M=False
+_L='temp_link.txt'
+_K='ID'
+_J='POST'
+_I='Version'
+_H='404'
+_G='GET'
+_F='400'
+_E=None
+_D='content_type'
+_C='message'
+_B='status_code'
+_A='application/json'
+from flask import Flask,render_template,request,redirect,url_for,session,jsonify,send_file,Response
+import connexion,json,subprocess,os
 from input.toEncodedPackage import createEncodedFile
-from sql.search import *
+from sql.search import*
 from json import load
 from time import sleep
 from os import remove
 from sys import stderr
-from sql.sql_header import *
-
-application = connexion.FlaskApp(__name__, specification_dir='Rest_API_File/')
-app = application.app
-app.secret_key = os.urandom(24)
-
-# Frontend Page navigation
-
-# These routes are used for navigation from one frontend page to another.
-# The operations (rate/upload/update/download) also have a page with
-# a form, which performs the operations on the inputted value and returns
-# another Frontend Completion Page
-
-#? This is the homepage for the website.
+from sql.sql_header import*
+application=connexion.FlaskApp(__name__,specification_dir='Rest_API_File/')
+app=application.app
+app.secret_key=os.urandom(24)
 @app.route('/')
-def home():
-    return render_template('Home.html')
-
-#? This is the page which lists all database 
-#? commands.
+def home():return render_template('Home.html')
 @app.route('/database/')
-def database():
-    return render_template('Database.html')
-
-#? This is the list of packages.
-#! May choose to not do this. Currently have no way of displaying all packages, so may want to ignore this
+def database():return render_template('Database.html')
 @app.route('/database/packages/')
-def packageList():
-    return render_template('PackageList.html')
-
-#? This is the upload frontend page. Takes a
-#? package URL and uploads to the SQL database.
-@app.route('/database/upload', methods=["GET", "POST"])
+def packageList():return render_template('PackageList.html')
+@app.route('/database/upload',methods=[_G,_J])
 def upload():
-    # If the submit button is pressed (A "POST" Operation)
-    if (request.method == "POST"):
-        
-        # Sets the default status to be an error
-        session['upload_status'] = "Error with Uploading"
-        
-        # Grabs the package URL from the upload form
-        package_url = request.form["upload_input"]
-        print("Input package_url: "+ package_url, file = stderr)
-        
-        # Checks to make sure that the input is a GitHub or NPM link
-        if("github.com" not in package_url and "npmjs.com" not in package_url):
-            session['upload_status_details'] = "Package is not uploaded due to an invalid URL link"
-            return redirect(url_for('uploadComplete'))
-        
-        # Check if the current URL already is uploaded
-        # Return error if already in database
-        exist = exists(table.c.PackageLink, package_url)
-        if exist is True:
-            session['upload_status_details'] = "Package is already uploaded, try updating instead!"
-            return redirect(url_for('uploadComplete'))
-            
-        # Open the temp_link for writing the data to
-        f = open("temp_link.txt", "w+")
-        f.write(package_url)
-        f.close()
-
-        # Runs the upload function from ./run, which calculates scoring
-        subprocess.run(["./run", "upload", "temp_link.txt"])
-        sleep(0.1)
-
-        # Grabs the URL and scores from the output json
-        output = load(open("output/output.json"))[0]
-
-        # Performs Ingestion on the package (enabled)
-        for score in output.values():
-            if type(score) == float and score < 0.5:
-                session['upload_status_details'] = "Package is not uploaded due to a disqualified rating.\nEvery metric must score greater than 0.5"
-                return redirect(url_for('uploadComplete'))
-
-        # Upload to SQL database
-        subprocess.run(["python3", "sql/upload.py"])
-
-        # Then, remove unneeded files
-        remove("output/output.json")
-        remove("temp_link.txt")
-        
-        # Return success page
-        session['upload_status'] = "Package has been Uploaded"
-        session['upload_status_details'] = "The given package has been uploaded to our database!"
-        return redirect(url_for('uploadComplete'))
-    else:
-        # Otherwise, just return the Upload page (A "GET" Operation)
-        return render_template('interactions/Upload.html')
-
-#? This is the update frontend page. Takes a URL and 
-#? updates the current entry in the SQL database with 
-#? most recent values.
-@app.route('/database/update/', methods=["GET", "POST"])
+	A='uploadComplete'
+	if request.method==_J:
+		session[_Y]='Error with Uploading';package_url=request.form['upload_input'];print('Input package_url: '+package_url,file=stderr)
+		if _k not in package_url and _l not in package_url:session[_Q]='Package is not uploaded due to an invalid URL link';return redirect(url_for(A))
+		exist=exists(table.c.PackageLink,package_url);f=open(_L,'w+');f.write(package_url);f.close();subprocess.run([_Z,_a,_L]);sleep(.1);output=load(open(_P))[0]
+		for score in output.values():
+			if type(score)==float and score<.5:session[_Q]=_m;return redirect(url_for(A))
+		subprocess.run([_S,_T]);remove(_P);remove(_L);session[_Y]='Package has been Uploaded';session[_Q]='The given package has been uploaded to our database!';return redirect(url_for(A))
+	else:return render_template('interactions/Upload.html')
+@app.route('/database/update/',methods=[_G,_J])
 def update():
-    # If the submit button is pressed (A "POST" Operation)
-    if (request.method == "POST"):
-        
-        # Sets default status message to be an error
-        session['update_status'] = "Error with Updating"
-        
-        # Grabs the package URL from the update form
-        package_url = request.form["update_input"]
-        
-        # Checks to make sure that the input is a GitHub or NPM link
-        if("github.com" not in package_url and "npmjs.com" not in package_url):
-            session['update_status_details'] = "Package is not updated due to an invalid URL link"
-            return redirect(url_for('updateComplete'))
-        
-        # Search through the SQL database in order to find the corresponding URL exists already
-        # Return error page if failed
-        exist = exists(table.c.PackageLink, package_url)
-
-        if exist is False:
-            session['update_status_details'] = "Package doesn't exist, try uploading instead!"
-            return redirect(url_for('updateComplete'))
-        
-        # Open the temp_link for writing the data to
-        f = open("temp_link.txt", "w+")
-        f.write(package_url)
-        f.close()
-
-        # Runs the upload function from ./run, which calculates scoring
-        subprocess.run(["./run", "upload", "temp_link.txt"])
-        sleep(0.1)
-
-        # Grabs the URL and scores from the output json
-        output = load(open("output/output.json"))[0]
-        
-        # Update SQL database with new values
-        subprocess.run(["python3", "sql/upload.py"])
-
-        # Remove unneeded files
-        remove("output/output.json")
-        remove("temp_link.txt")
-        
-        # Show success page on success
-        session['update_status'] = "Package has been Updated"
-        session['update_status_details'] = "The given package has been updated in our database!"
-        return redirect(url_for('updateComplete'))
-    else:
-        # Otherwise, just return the Update page (A "GET" Operation)
-        return render_template('/interactions/Update.html')
-
-#? This is the rate frontend page. Takes a URL and 
-#? displays the ratings for such page.
-@app.route('/database/rate/', methods=["GET", "POST"])
+	A='updateComplete'
+	if request.method==_J:
+		session[_b]='Error with Updating';package_url=request.form['update_input']
+		if _k not in package_url and _l not in package_url:session[_U]='Package is not updated due to an invalid URL link';return redirect(url_for(A))
+		exist=exists(table.c.PackageLink,package_url)
+		if exist is _M:session[_U]="Package doesn't exist, try uploading instead!";return redirect(url_for(A))
+		f=open(_L,'w+');f.write(package_url);f.close();subprocess.run([_Z,_a,_L]);sleep(.1);output=load(open(_P))[0];subprocess.run([_S,_T]);remove(_P);remove(_L);session[_b]='Package has been Updated';session[_U]='The given package has been updated in our database!';return redirect(url_for(A))
+	else:return render_template('/interactions/Update.html')
+@app.route('/database/rate/',methods=[_G,_J])
 def rate():
-    # If the submit button is pressed (A "POST" Operation)
-    if (request.method == "POST"):
-        
-        # Sets the default status to be an error
-        session['rate_status'] = "Error with Rating"
-        
-        # Grabs the package URL from the rate form
-        package_url = request.form["rate_input"]
-        
-        # Search through the SQL database in order to find the corresponding URL
-        exist = exists(table.c.PackageLink, package_url)
-
-        if exist is False:
-            session['rate_status'] = "No such package exists!"
-            return redirect(url_for('rateComplete'))
-        
-        # Grab all scores from the SQL database
-        columns =  ["PackageName", "PackageLink", "Responsiveness", "UpdatedCode", "Correctness", "BusFactor", "RampUp", "Licensing", "Pinning", "NetScore"]
-        query = db.select(table).where(table.c.PackageLink == package_url)
-        result = connection.execute(query).fetchall()
-        print(table.columns.keys())
-        # Return rating page that shows all scores according to the data gathered
-        session['rate_status'] = f'Results for {result[0][0]}:'
-        session['rate_status_details'] = f'Net Score: {result[0][8]}, Bus Factor: {result[0][5]}, Ramp Up: {result[0][6]},\n Pinning Practice: {result[0][10]}, Responsiveness: {result[0][2]}, Pull Requests: {result[0][3]}\n, Correctness: {result[0][4]}, Licensing: {result[0][7]}'
-        return redirect(url_for('rateComplete'))
-    else:
-        # Otherwise, just return the Rate page (A "GET" Operation)
-        return render_template('interactions/Rate.html')
-
-#? This is the download frontend page. Takes a URL 
-#? and downloads a local copy for the user.
-@app.route('/database/download/', methods=["GET", "POST"])
+	A='rateComplete'
+	if request.method==_J:
+		session[_V]='Error with Rating';package_url=request.form['rate_input'];exist=exists(table.c.PackageLink,package_url)
+		if exist is _M:session[_V]=_n;return redirect(url_for(A))
+		columns=[_W,_o,_p,_q,_c,_d,_e,_r,_s,_f];query=db.select(table).where(table.c.PackageLink==package_url);result=connection.execute(query).fetchall();print(table.columns.keys());session[_V]=f"Results for {result[0][0]}:";session[_t]=f"Net Score: {result[0][8]}, Bus Factor: {result[0][5]}, Ramp Up: {result[0][6]},\n Pinning Practice: {result[0][10]}, Responsiveness: {result[0][2]}, Pull Requests: {result[0][3]}\n, Correctness: {result[0][4]}, Licensing: {result[0][7]}";return redirect(url_for(A))
+	else:return render_template('interactions/Rate.html')
+@app.route('/database/download/',methods=[_G,_J])
 def download():
-    # If the submit button is pressed (A "POST" Operation)
-    if (request.method == "POST"):
-
-        # Sets the default status to be an error
-        session['download_status'] = "Error with Downloading"
-        
-        # Grabs the package URL from the download form
-        package_url = request.form["download_input"]
-        
-        # Search through the SQL database in order to find the corresponding URL
-        exist = exists(table.c.PackageLink, package_url)
-        if exist is False:
-            session['download_status_details'] = "No such package exists!"
-            return redirect(url_for('downloadComplete'))
-        
-        # Create the Base64 package, and return the package. Can be changed to be .zip instead if needed
-        zipPackage, encodedPackage = createEncodedFile(package_url)
-        return send_file(f'{zipPackage}', as_attachment=True)
-    else:
-        # First, delete all previous .zip and Base64 files
-        if os.path.exists('local_cloning/encoded_repos'):
-            for f in os.listdir('local_cloning/encoded_repos'):
-                os.remove(os.path.join('local_cloning/encoded_repos', f))
-        
-        # Otherwise, just return the Download page (A "GET" Operation)
-        return render_template('/interactions/Download.html')
-
-# Frontend Completion Pages:
-
-# These Pages are used to show results or to inform the user of a success/fail for
-# all operations through the frontend website.
-
-#? The page for displaying completion/errors for uploads.
-@app.route('/database/upload/complete', methods=["GET"])
-def uploadComplete():
-    # Returns the upload completion page, for both errors and success
-    return render_template('interactions/complete/UploadComplete.html',
-                           status_message=session['upload_status'],
-                           status_message_details=session['upload_status_details'])
-
-#? The page for displaying completion/errors for updates.
-@app.route('/database/update/complete', methods=["GET"])
-def updateComplete():
-    # Returns the update completion page, for both errors and success
-    return render_template('interactions/complete/UpdateComplete.html', 
-                           status_message=session['update_status'],
-                           status_message_details=session['update_status_details'])
-
-#? The page for displaying completion/errors for ratings.
-@app.route('/database/rate/complete', methods=["GET"])
-def rateComplete():
-    return render_template('interactions/complete/RateComplete.html',
-                           status_message=session['rate_status'],
-                           status_message_details=session['rate_status_details'])
-
-#? The page for displaying completion/errors for downloads.
-@app.route('/database/download/complete', methods=["GET"])
-def downloadComplete():
-    return render_template('interactions/complete/DownloadComplete.html',
-                           status_message=session['download_status'],
-                           status_message_details=session['download_status_details'])
-
-
-# Backend Paths and Operations:
-
-# These routes are used to handle all REST API calls and operations.
-# Some of these routes are similar to the Frontend Page Operations,
-# but most operate differently and return JSON responses back to the
-# user.
-
-#? We have no authentication, should return 501
-@app.route('/authenticate', methods=["PUT"])
-def CreateAuthToken():
-    return jsonify({'status_code': '501',
-                    'message': 'This system does not support authentication'}), 501, {'content_type': 'application/json'}
-
-#? Uploads a new package to our database. This operates similarly to
-#? the "Upload" Frontend Page Operation.
-@app.route('/package', methods=["POST"])
-def PackageCreate():   
-    
-    # Loads and checks the data from the request
-    #!logs input
-    data = json.loads(request.data)
-    print("Autograder input: {}".format(data), file = stderr)
-
-    if "URL" in data and data["URL"] != None:
-        file = data["URL"]
-    elif "Content" in data and data["Content"] != None:
-        file = data["Content"]
-    else:
-        return jsonify({'status_code': '400',
-                        'message': 'There is missing field(s) in the PackageData or it is formed inproperly'}), 400, {'content_type': 'application/json'}
-    
-    # Open the temp_link for writing the data to
-    f = open("temp_link.txt", "w+")
-    f.write(file)
-    f.close()
-
-    # Runs the upload function from ./run, which calculates scoring
-    subprocess.run(["./run", "upload", "temp_link.txt"])
-    sleep(0.1)
-    
-    # Grabs the URL and scores from the output json
-    output = load(open("output/output.json"))[0]
-    obtainedURL = output["URL"]
-
-    # Checks if the url is already in the SQL database
-    exist = exists(table.c.PackageLink, obtainedURL)
-    if exist is True:
-       return jsonify({'status_code': '409',
-                        'message': 'Package exists already.'}), 409, {'content_type': 'application/json'}
-            
-    # Performs Ingestion on the package (enabled)
-    for score in output.values():
-        if type(score) == float and score < 0.5:
-            session['upload_status_details'] = "Package is not uploaded due to a disqualified rating.\nEvery metric must score greater than 0.5"
-            return jsonify({'status_code': '424','message': 'Package is not uploaded due to the disqualified rating.'}), 424, {'content_type': 'application/json'}
-
-    # Upload to SQL database
-    subprocess.run(["python3", "sql/upload.py"])
-
-    # Then, remove unneeded files from local directories
-    remove("output/output.json")
-    remove("temp_link.txt")
-
-    # Grab version number from package.json. Returns error 404 if it does not exist
-    try:
-        version = load(open(f'local_cloning/cloned_repos/{os.path.basename(obtainedURL)}/package.json'))["version"]
-    except:
-        return jsonify({'status_code': '404',
-                        'message': 'The provided package does not have a valid \'package.json\''}), 404, {'content_type': 'application/json'}
-
-    #Get ID from SQL database
-    query = db.select(table.c.ID).where(table.c.PackageLink == obtainedURL)
-    return_id = connection.execute(query).scalar()
-    
-    # Form the metadata return field
-    metadata = {'ID': f'{return_id}',
-                'Name': f'{os.path.basename(obtainedURL)}',
-                'Version': f'{version}'}
-    
-    # Form the data return field. Contains the URL
-    packageData = {'Content': None,
-                    'URL': f'{obtainedURL}',
-                    'JSProgram': None}
-
-    # Return success
-    return jsonify({'status_code': '201',
-                    'message': 'Success. Check the ID in the returned metadata for the official ID.',
-                    'data': packageData,
-                    'metadata': metadata}), 201, {'content_type': 'application/json'}
-
-#? This uses the search function that we have created to search
-#? for a list of Package types.
-@app.route('/package/byRegEx', methods=["GET"])
+	A='local_cloning/encoded_repos'
+	if request.method==_J:
+		session[_u]='Error with Downloading';package_url=request.form['download_input'];exist=exists(table.c.PackageLink,package_url)
+		if exist is _M:session[_v]=_n;return redirect(url_for('downloadComplete'))
+		zipPackage,encodedPackage=createEncodedFile(package_url);return send_file(f"{zipPackage}",as_attachment=True)
+	else:
+		if os.path.exists(A):
+			for f in os.listdir(A):os.remove(os.path.join(A,f))
+		return render_template('/interactions/Download.html')
+@app.route('/database/upload/complete',methods=[_G])
+def uploadComplete():return render_template('interactions/complete/UploadComplete.html',status_message=session[_Y],status_message_details=session[_Q])
+@app.route('/database/update/complete',methods=[_G])
+def updateComplete():return render_template('interactions/complete/UpdateComplete.html',status_message=session[_b],status_message_details=session[_U])
+@app.route('/database/rate/complete',methods=[_G])
+def rateComplete():return render_template('interactions/complete/RateComplete.html',status_message=session[_V],status_message_details=session[_t])
+@app.route('/database/download/complete',methods=[_G])
+def downloadComplete():return render_template('interactions/complete/DownloadComplete.html',status_message=session[_u],status_message_details=session[_v])
+@app.route('/authenticate',methods=['PUT'])
+def CreateAuthToken():return jsonify({_B:'501',_C:'This system does not support authentication'}),501,{_D:_A}
+@app.route('/package',methods=[_J])
+def PackageCreate():
+	B='Content';A='URL';data=json.loads(request.data);print(_X.format(data),file=stderr)
+	if A in data and data[A]!=_E:file=data[A]
+	elif B in data and data[B]!=_E:file=data[B]
+	else:return jsonify({_B:_F,_C:'There is missing field(s) in the PackageData or it is formed inproperly'}),400,{_D:_A}
+	f=open(_L,'w+');f.write(file);f.close();subprocess.run([_Z,_a,_L]);sleep(.1);output=load(open(_P))[0];obtainedURL=output[A];exist=exists(table.c.PackageLink,obtainedURL)
+	for score in output.values():
+		if type(score)==float and score<.5:session[_Q]=_m;return jsonify({_B:'424',_C:'Package is not uploaded due to the disqualified rating.'}),424,{_D:_A}
+	subprocess.run([_S,_T]);remove(_P);remove(_L)
+	try:version=load(open(f"local_cloning/cloned_repos/{os.path.basename(obtainedURL)}/package.json"))['version']
+	except:return jsonify({_B:_H,_C:"The provided package does not have a valid 'package.json'"}),404,{_D:_A}
+	query=db.select(table.c.ID).where(table.c.PackageLink==obtainedURL);return_id=connection.execute(query).scalar();metadata={_K:f"{return_id}",_N:f"{os.path.basename(obtainedURL)}",_I:f"{version}"};packageData={B:_E,A:f"{obtainedURL}",'JSProgram':_E};return jsonify({_B:'201',_C:'Success. Check the ID in the returned metadata for the official ID.',_g:packageData,_w:metadata}),201,{_D:_A}
+@app.route('/package/byRegEx',methods=[_G])
 def PackageByRegExGet():
-
-    #!logs input
-    data = json.loads(request.data)
-    print("Autograder input: {}".format(data), file = stderr)
-    
-    # Loads and checks the data from the request.
-    #TODO Assuming currently that this is saved in the json under the 'regex' key. May not be in actuality
-    regex = data["regex"]
-    if regex == None:
-        return jsonify({'status_code': '400',
-                        'message': 'There must be a regular expression that can be used in the body.'}), 400, {'content_type': 'application/json'}
-    
-    # Otherwise, perform search function through SQL database
-    packageMatches = []
-    t = sqlalchemy.text("SELECT * FROM Packages")
-    result = connection.execute(t)
-    
-    # Do something with the results
-    for row in result:
-        if checkInput(row[0],  regex) or checkInput(row[1],  regex) or checkInput(row[9], regex):
-            packageMatches.append({'Name': row[0], 'ID': row[11], 'Version': row[13]})
-            
-    # If the package is not found, return 404 error
-    if not packageMatches:
-        return jsonify({'status_code': '404',
-                        'message': 'No package found under this regex'}), 404, {'content_type': 'application/json'}
-    
-    # Otherwise, return a list of all packages that match
-    return jsonify({'status_code': '200',
-                    'message': 'Attached is the list of packages. Check the \'data\' field for the list',
-                    'data': packageMatches}), 200, {'content_type': 'application/json'}
-
-
-#? This will delete packages from SQL database 
-#? by the name provided.
-@app.route('/package/byName/<name>', methods=["DELETE"])
-def PackageByNameDelete(name=None):
-    # Check if a name is actually passed, and return error if not
-    if name == None:
-        return jsonify({'status_code': '400',
-                        'message': 'Package name cannot be \'None\'.'}), 400, {'content_type': 'application/json'}
-    
-    # First, check if package name is in our SQL database. Return 404 if not in database
-    exist = exists(table.c.PackageName, name)
-    if exist is False:
-       return jsonify({'status_code': '404',
-                        'message': 'Package doesn\'t exist.'}), 404, {'content_type': 'application/json'}
-
-    # Then, use SQL commands to delete package
-    query = db.delete(table).where(table.c.PackageName == name)
-    connection.execute(query)
-    connection.commit()
-    
-    # Finally, return 200 if everything is successful
-    return jsonify({'status_code': '200',
-                    'message': 'Package is deleted'}), 200, {'content_type': 'application/json'}
-
-#? This will obtain the most recent change to the 
-#? package (date of last modification).
-@app.route('/package/byName/<name>', methods=["GET"])
-def PackageByNameGet(name=None):
-    # Check if a name is actually passed, and return error if not
-    if name == None:
-        return jsonify({'status_code': '400',
-                        'message': 'Package name cannot be \'None\'.'}), 400, {'content_type': 'application/json'}
-    
-    # First, check if the package name is in our SQL database. Return 404 if not in database
-    exist = exists(table.c.PackageName, name)
-    if exist is False:
-       return jsonify({'status_code': '404',
-                        'message': 'Package doesn\'t exist.'}), 404, {'content_type': 'application/json'}
-    
-    # Then, use SQL commands to obtain when the package was entered into the SQL database
-    query = db.select(table.c.LastModified).where(table.c.PackageName == name)
-    history_date = connection.execute(query).scalar()
-    
-    # Finally, return 200 with correct message
-    return jsonify({'status_code': '200',
-                    'message' : 'Obtained the history of the given package. Check in the \'history\' field for the data.',
-                    'history' : f'{history_date}'}), 200, {'content_type': 'application/json'}
-
-
-#? This deletes packages based on the id provided.
-@app.route('/package/<id>', methods=["DELETE"])
-def PackageDelete(id=None):
-    
-    # First, check if ID is none
-    if id == None:
-        return jsonify({'status_code': '400', 
-                        'message': 'There must be an ID value in order to delete packages'}), 400, {'content_type': 'application/json'}
-    
-    # Then, check if package is within SQL database by ID
-    exist = exists(table.c.ID, id)
-    if exist is False:
-       return jsonify({'status_code': '404',
-                        'message': 'Package doesn\'t exist.'}), 404, {'content_type': 'application/json'}
-    
-    # Then, delete package from SQL database
-    query = db.delete(table).where(table.c.ID == id)
-    connection.execute(query)
-    connection.commit()
-    
-    # Finally, return 200 if deleted
-    return jsonify({'status_code': '200',
-                    'message': 'Package is deleted'}), 200, {'content_type': 'application/json'}
-
-#? This retrieves a base64 package from the database. This 
-#? operates similarly to the 'Download" Frontend Page Operation.
-@app.route('/package/<id>', methods=["GET"])
-def PackageRetrieve(id=None):
-    
-    # First, check if ID is none
-    if id == None:
-        return jsonify({'status_code': '400',
-                        'message': 'There must be an ID value in order to delete packages'}), 400, {'content_type': 'application/json'}
-    
-    # Then, check if package exists in the SQL database
-    exist = exists(table.c.ID, id)
-    if exist is False:
-       return jsonify({'status_code': '404',
-                        'message': 'Package doesn\'t exist.'}), 404, {'content_type': 'application/json'}
-    
-    # Obtain the URL from the database
-    query = db.select(table.c["PackageName", "Version", "PackageLink"]).where(table.c.ID == id)
-    result = connection.execute(query).fetchone()
-    
-    # Then, convert package into base64/obtain base64 package for PackageData type field
-    zipPackagePath, base64PackagePath = createEncodedFile(result[2])
-    data = open(base64PackagePath, 'rb')
-    packageMetadata = {'ID': f'{id}',
-                       'Name': f'{result[0]}',
-                       'Version': f'{result[1]}'}
-    
-    # Return success
-    def generator(packageMetadata, URL, ContentFile):
-        yield  '{"status_code": "200", "message": "Success. The package has been obtained by ID.", "metadata": ' + json.dumps(packageMetadata) + ', "data": {"URL": "' + URL + '", "Content": "'
-        while True:
-            data = ContentFile.read(256)
-            if not data:
-                break
-            yield data
-        yield   '"}}'
-    return Response(generator(packageMetadata, result[2], data), content_type='application/json')
-
-#? This will replace the current ID with a new package 
-#? version (update), as long as ID, version, and name match.
-#? aka update by ID
-@app.route('/package/<id>', methods=["PUT"])
-def PackageUpdate(id=None):
-    
-    # First, check if ID is none
-    if id == None:
-        return jsonify({'status_code': '400',
-                        'message': 'There must be an ID value in order to delete packages'}), 400, {'content_type': 'application/json'}
-    
-    # Next, obtain data from response.
-    #!logs input
-    data = json.loads(request.data)
-    print("Autograder input: {}".format(data), file = stderr)
-    
-    # Then, check that there is an ID, name, and version provided
-    if not data["ID"] or data["ID"] == None:
-        return jsonify({'status_code': '400',
-                        'message': 'There are missing field(s) in the request body. There must be an \'ID\', \'Name\', and \'Version\'.'}), 400, {'content_type': 'application/json'}
-    elif not data["Name"] or data["Name"] == None:
-        return jsonify({'status_code': '400',
-                        'message': 'There are missing field(s) in the request body. There must be an \'ID\', \'Name\', and \'Version\'.'}), 400, {'content_type': 'application/json'}
-    elif not data["Version"] or data["Version"] == None:
-        return jsonify({'status_code': '400',
-                        'message': 'There are missing field(s) in the request body. There must be an \'ID\', \'Name\', and \'Version\'.'}), 400, {'content_type': 'application/json'}
-    
-    # Then, check if id/name/version match in database. Start with id, then check name and version associated with that id, else return error 404
-    query = db.select(table.c["ID", "PackageName", "Version"]).where(table.c.ID == id)
-    return_list = connection.execute(query).fetchone()
-
-    if return_list[0] != data["ID"]:
-        return jsonify({'status_code': '404',
-                        'message': 'Package does not exist. There must be an \'id\', \'name\', and \'version\'.'}), 404, {'content_type': 'application/json'}
-    
-    if return_list[1] != data["Name"]:
-        return jsonify({'status_code': '404',
-                        'message': 'Package does not exist. There must be an \'id\', \'name\', and \'version\'.'}), 404, {'content_type': 'application/json'}
-
-    if return_list[2] != data["Version"]:
-        return jsonify({'status_code': '404',
-                        'message': 'Package does not exist. There must be an \'id\', \'name\', and \'version\'.'}), 404, {'content_type': 'application/json'}
-    
-    # Update the values for the id
-    subprocess.run(["python3", "sql/upload.py"])
-    
-    # Finally, return 200 status code
-    return jsonify({'status_code': '200',
-                    'message': 'Version is updated'}), 200, {'content_type': 'application/json'}
-
-#? This is the rating function for a package's id value. This
-#? operates similarly to the "Rate" Frontend Page Operation.
-@app.route('/package/<id>/rate', methods=["GET"])
-def PackageRate(id=None):
-    
-    # First, check if id is None
-    if id == None:
-        return jsonify({'status_code': '400',
-                        'message': 'There must be a valid ID in order to rate packages'}), 400, {'content_type': 'application/json'}
-    
-    # Then, check if package is within SQL database by ID
-    exist = exists(table.c.ID, id)
-    if exist is False:
-       return jsonify({'status_code': '404',
-                        'message': 'Package doesn\'t exist.'}), 404, {'content_type': 'application/json'}
-    
-    # Then, obtain the scores from the SQL database
-    query = db.select(table.c["BusFactor", "Correctness", "Pinning", "Licensing", "NetScore", "UpdatedCode", "RampUp", "Responsiveness"]).where(table.c.ID == id)
-    result = connection.execute(query).fetchone()
-
-    # Then, need to format scores according to the PackageRating definition in the YAML and return 200 and PackageRating if successful
-    packageRatings = {'BusFactor': f'{result[0]}',
-                  'Correctness': f'{result[1]}',
-                  'GoodPinningPractice': f'{result[2]}',
-                  'LicenseScore': f'{result[3]}',
-                  'NetScore': f'{result[4]}',
-                  'PullRequest': f'{result[5]}',
-                  'RampUp': f'{result[6]}',
-                  'ResponsiveMaintainer': f'{result[7]}'}
-    
-    return jsonify({'status_code': '200',
-                    'message': 'Rating has been calculated. View the \'data\' field for values',
-                    'data': packageRatings}), 200, {'content_type': 'application/json'}
-
-#? This is the fetch command. Need to understand it more
-#? before implementing it.
-#! No idea how to do this currently, must examine later
-@app.route('/packages', methods=["POST"])
+	data=json.loads(request.data);print(_X.format(data),file=stderr);regex=data['regex']
+	if regex==_E:return jsonify({_B:_F,_C:'There must be a regular expression that can be used in the body.'}),400,{_D:_A}
+	packageMatches=[];t=sqlalchemy.text(_x);result=connection.execute(t)
+	for row in result:
+		if checkInput(row[0],regex)or checkInput(row[1],regex)or checkInput(row[9],regex):packageMatches.append({_N:row[0],_K:row[11],_I:row[13]})
+	if not packageMatches:return jsonify({_B:_H,_C:'No package found under this regex'}),404,{_D:_A}
+	return jsonify({_B:_O,_C:"Attached is the list of packages. Check the 'data' field for the list",_g:packageMatches}),200,{_D:_A}
+@app.route(_A0,methods=[_h])
+def PackageByNameDelete(name=_E):
+	if name==_E:return jsonify({_B:_F,_C:_y}),400,{_D:_A}
+	exist=exists(table.c.PackageName,name)
+	if exist is _M:return jsonify({_B:_H,_C:_R}),404,{_D:_A}
+	query=db.delete(table).where(table.c.PackageName==name);connection.execute(query);connection.commit();return jsonify({_B:_O,_C:_z}),200,{_D:_A}
+@app.route(_A0,methods=[_G])
+def PackageByNameGet(name=_E):
+	if name==_E:return jsonify({_B:_F,_C:_y}),400,{_D:_A}
+	exist=exists(table.c.PackageName,name)
+	if exist is _M:return jsonify({_B:_H,_C:_R}),404,{_D:_A}
+	query=db.select(table.c.LastModified).where(table.c.PackageName==name);history_date=connection.execute(query).scalar();return jsonify({_B:_O,_C:"Obtained the history of the given package. Check in the 'history' field for the data.",'history':f"{history_date}"}),200,{_D:_A}
+@app.route(_j,methods=[_h])
+def PackageDelete(id=_E):
+	if id==_E:return jsonify({_B:_F,_C:_i}),400,{_D:_A}
+	exist=exists(table.c.ID,id)
+	if exist is _M:return jsonify({_B:_H,_C:_R}),404,{_D:_A}
+	query=db.delete(table).where(table.c.ID==id);connection.execute(query);connection.commit();return jsonify({_B:_O,_C:_z}),200,{_D:_A}
+@app.route(_j,methods=[_G])
+def PackageRetrieve(id=_E):
+	if id==_E:return jsonify({_B:_F,_C:_i}),400,{_D:_A}
+	exist=exists(table.c.ID,id)
+	if exist is _M:return jsonify({_B:_H,_C:_R}),404,{_D:_A}
+	query=db.select(table.c[_W,_I,_o]).where(table.c.ID==id);result=connection.execute(query).fetchone();zipPackagePath,base64PackagePath=createEncodedFile(result[2]);data=open(base64PackagePath,'rb');packageMetadata={_K:f"{id}",_N:f"{result[0]}",_I:f"{result[1]}"}
+	def generator(packageMetadata,URL,ContentFile):
+		yield'{"status_code": "200", "message": "Success. The package has been obtained by ID.", "metadata": '+json.dumps(packageMetadata)+', "data": {"URL": "'+URL+'", "Content": "'
+		while True:
+			data=ContentFile.read(256)
+			if not data:break
+			yield data
+		yield'"}}'
+	return Response(generator(packageMetadata,result[2],data),content_type=_A)
+@app.route(_j,methods=['PUT'])
+def PackageUpdate(id=_E):
+	B="Package does not exist. There must be an 'id', 'name', and 'version'.";A="There are missing field(s) in the request body. There must be an 'ID', 'Name', and 'Version'."
+	if id==_E:return jsonify({_B:_F,_C:_i}),400,{_D:_A}
+	data=json.loads(request.data);print(_X.format(data),file=stderr)
+	if not data[_K]or data[_K]==_E:return jsonify({_B:_F,_C:A}),400,{_D:_A}
+	elif not data[_N]or data[_N]==_E:return jsonify({_B:_F,_C:A}),400,{_D:_A}
+	elif not data[_I]or data[_I]==_E:return jsonify({_B:_F,_C:A}),400,{_D:_A}
+	query=db.select(table.c[_K,_W,_I]).where(table.c.ID==id);return_list=connection.execute(query).fetchone()
+	if return_list[0]!=data[_K]:return jsonify({_B:_H,_C:B}),404,{_D:_A}
+	if return_list[1]!=data[_N]:return jsonify({_B:_H,_C:B}),404,{_D:_A}
+	if return_list[2]!=data[_I]:return jsonify({_B:_H,_C:B}),404,{_D:_A}
+	subprocess.run([_S,_T]);return jsonify({_B:_O,_C:'Version is updated'}),200,{_D:_A}
+@app.route('/package/<id>/rate',methods=[_G])
+def PackageRate(id=_E):
+	if id==_E:return jsonify({_B:_F,_C:'There must be a valid ID in order to rate packages'}),400,{_D:_A}
+	exist=exists(table.c.ID,id)
+	if exist is _M:return jsonify({_B:_H,_C:_R}),404,{_D:_A}
+	query=db.select(table.c[_d,_c,_s,_r,_f,_q,_e,_p]).where(table.c.ID==id);result=connection.execute(query).fetchone();packageRatings={_d:f"{result[0]}",_c:f"{result[1]}",'GoodPinningPractice':f"{result[2]}",'LicenseScore':f"{result[3]}",_f:f"{result[4]}",'PullRequest':f"{result[5]}",_e:f"{result[6]}",'ResponsiveMaintainer':f"{result[7]}"};return jsonify({_B:_O,_C:"Rating has been calculated. View the 'data' field for values",_g:packageRatings}),200,{_D:_A}
+@app.route('/packages',methods=[_J])
 def PackagesList():
-    # First, check that the query is provided
-    data = json.loads(request.data)
-    print("Autograder input: {}".format(data), file = stderr)
-    
-    if not data["SemverRange"] or data["SemverRange"] == None:
-        return jsonify({'status_code': '400',
-                        'message': 'There are missing fields in the PackageQuery'}), 400, {'content_type': 'application/json'}
-    if not data["PackageNames"] or data["PackageNames"] == None:
-        return jsonify({'status_code': '400',
-                        'message': 'There are missing fields in the PackageQuery'}), 400, {'content_type': 'application/json'}
-    
-    packageList = []
-    
-    # Grab the range of version to allow
-    providedRange = data["SemverRange"]
-    if providedRange.find('-') != -1:
-        lowerBound = providedRange.split('-')[0]
-        upperBound = providedRange.split('-')[1]
-    elif providedRange.find('^') != -1:
-        lowerBound = providedRange.split('^')[0]
-        upperBound = providedRange.split('^')[0]
-    elif providedRange.find('~') != -1:
-        lowerBound = providedRange.split('~')[0]
-        upperBound = providedRange.split('~')[0]
-    else:
-        lowerBound = providedRange
-        upperBound = providedRange
-        
-    # Check if need to get all by searching if first element is '*'
-    if data["PackageNames"][0] == '*':
-         # Otherwise, perform search function through SQL database
-        t = sqlalchemy.text("SELECT * FROM Packages")
-        result = connection.execute(t)
-        
-        # Do something with the results
-        for row in result:
-            obtainedVersion = row[13]
-            numericValues = obtainedVersion.split('.')
-            # Check major number
-            if numericValues[0] >= lowerBound.split('.')[0] and numericValues[0] <= upperBound.split('.')[0]:
-                # Check next
-                if numericValues[1] >= lowerBound.split('.')[1] and numericValues[1] <= upperBound.split('.')[1]:
-                    # Check final
-                    if numericValues[2] >= lowerBound.split('.')[2] and numericValues[2] <= upperBound.split('.')[2]:
-                        packageList.append({'Name': row[0], 'ID': row[11], 'Version': row[13]})
-    elif not data["PackageNames"]:
-        return jsonify({'status_code': '413',
-                        'message': 'Too many packages to return. Please specify a PackageQuery.'}), 413, {'content_type': 'application/json'}
-    else:
-        for package in data["PackageNames"]:
-            if exists(table.c.PackageName, package):
-                query = db.select(table.c["PackageName", "ID", "Version"]).where(table.c.PackageName == package)
-                result = connection.execute(query).fetchone()
-                numericValues = result[2].split('.')
-                if numericValues[0] >= lowerBound.split('.')[0] and numericValues[0] <= upperBound.split('.')[0]:
-                    # Check next
-                    if numericValues[1] >= lowerBound.split('.')[1] and numericValues[1] <= upperBound.split('.')[1]:
-                        # Check final
-                        if numericValues[2] >= lowerBound.split('.')[2] and numericValues[2] <= upperBound.split('.')[2]:
-                            packageList.append({'Name': result[0], 'ID': result[1], 'Version': result[2]})
-        
-    
-    # Check if for no matches for SemverRange were found
-    if not packageList:
-        return jsonify({'status_code': '404', 
-                        'message': 'No packages could be obtained within the provided SemverRange.'}), 404, {'content_type': 'application/json'}
-    
-    return jsonify({'status_code': '200',
-                    'message': 'Obtained a list of packages. Check the \'metadata\' field for the list.',
-                    'metadata': packageList}), 200, {'content_type': 'application/json'}
-
-#? This is the SQL reset. Resets the SQL database to a 
-#? default state.
-@app.route('/reset', methods=["DELETE"])
-def RegistryReset():
-
-    # SQL delete table
-    query = db.delete(table)
-    connection.execute(query)
-    connection.commit()
-
-    # Return success
-    return jsonify({'status_code': '200',
-                    'message': 'Registry is reset'}), 200, {'content_type': 'application/json'}
-
-
-# Main function call to start backend/frontend
-if __name__ == "__main__":
-    application.add_api('api-spec.yaml')
-    app.static_folder = ('templates/static')
-    app.template_folder = ('templates')
-    app.run(debug = True, host = '0.0.0.0', port  = int(os.environ.get('PORT', 8080)))
-
+	G='There are missing fields in the PackageQuery';F='~';E='^';D='-';C='SemverRange';B='PackageNames';A='.';data=json.loads(request.data);print(_X.format(data),file=stderr)
+	if not data[C]or data[C]==_E:return jsonify({_B:_F,_C:G}),400,{_D:_A}
+	if not data[B]or data[B]==_E:return jsonify({_B:_F,_C:G}),400,{_D:_A}
+	packageList=[];providedRange=data[C]
+	if providedRange.find(D)!=-1:lowerBound=providedRange.split(D)[0];upperBound=providedRange.split(D)[1]
+	elif providedRange.find(E)!=-1:lowerBound=providedRange.split(E)[0];upperBound=providedRange.split(E)[0]
+	elif providedRange.find(F)!=-1:lowerBound=providedRange.split(F)[0];upperBound=providedRange.split(F)[0]
+	else:lowerBound=providedRange;upperBound=providedRange
+	if data[B][0]=='*':
+		t=sqlalchemy.text(_x);result=connection.execute(t)
+		for row in result:
+			obtainedVersion=row[13];numericValues=obtainedVersion.split(A)
+			if numericValues[0]>=lowerBound.split(A)[0]and numericValues[0]<=upperBound.split(A)[0]:
+				if numericValues[1]>=lowerBound.split(A)[1]and numericValues[1]<=upperBound.split(A)[1]:
+					if numericValues[2]>=lowerBound.split(A)[2]and numericValues[2]<=upperBound.split(A)[2]:packageList.append({_N:row[0],_K:row[11],_I:row[13]})
+	elif not data[B]:return jsonify({_B:'413',_C:'Too many packages to return. Please specify a PackageQuery.'}),413,{_D:_A}
+	else:
+		for package in data[B]:
+			if exists(table.c.PackageName,package):
+				query=db.select(table.c[_W,_K,_I]).where(table.c.PackageName==package);result=connection.execute(query).fetchone();numericValues=result[2].split(A)
+				if numericValues[0]>=lowerBound.split(A)[0]and numericValues[0]<=upperBound.split(A)[0]:
+					if numericValues[1]>=lowerBound.split(A)[1]and numericValues[1]<=upperBound.split(A)[1]:
+						if numericValues[2]>=lowerBound.split(A)[2]and numericValues[2]<=upperBound.split(A)[2]:packageList.append({_N:result[0],_K:result[1],_I:result[2]})
+	if not packageList:return jsonify({_B:_H,_C:'No packages could be obtained within the provided SemverRange.'}),404,{_D:_A}
+	return jsonify({_B:_O,_C:"Obtained a list of packages. Check the 'metadata' field for the list.",_w:packageList}),200,{_D:_A}
+@app.route('/reset',methods=[_h])
+def RegistryReset():query=db.delete(table);connection.execute(query);connection.commit();return jsonify({_B:_O,_C:'Registry is reset'}),200,{_D:_A}
+if __name__=='__main__':application.add_api('api-spec.yaml');app.static_folder='templates/static';app.template_folder='templates';app.run(debug=True,host='0.0.0.0',port=int(os.environ.get('PORT',8080)))
