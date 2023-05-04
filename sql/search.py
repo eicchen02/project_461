@@ -6,13 +6,13 @@ Name: Elijah Klein
     Details: checkTitle searches the repo title via native re regex package
         checkRM searches the according readMe for the given name
 """
-from .sql_header import *
 import re
 import sys
+
 import pymysql
 import sqlalchemy
 from google.cloud.sql.connector import Connector
-
+from sql_header import *
 
 
 def checkInput(input_term, search_term):
@@ -36,10 +36,11 @@ def main():
         # Do something with the results
         for row in result:
             if checkInput(row[0],  search_term) or checkInput(row[1],  search_term) or checkInput(row[9], search_term):
-                foundNames.append({'Name': row[0], 'ID': row[11], 'Version': row[13]})
+                foundNames.append(1)
+            else:
+                foundNames.append(0)
 
     print(foundNames)
     return foundNames
 
-if __name__ == "__main__":
-    main()
+main()

@@ -27,7 +27,7 @@ fn main() {
         //Determing what the input is (either base64 encoded file, or URL)
         let cloned_repo_id = Command::new("python3")
             .arg("input/obtainURL.py")
-            .arg(&cli_input[2])
+            .arg(&url)
             .output()
             .expect("Err");
         let mut input = String::from_utf8(cloned_repo_id.stdout).unwrap();

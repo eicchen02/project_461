@@ -17,7 +17,7 @@ use std::io::Write;
 pub fn calculate_busfactor(numcommits: f64, numcontributors: f64, numfiles: f64) -> f64{
 
     let busfactor: f64;
-    busfactor = 1.5 * ((numcontributors / numcommits) + (numcontributors / numfiles)); //Calculate the score as an average between two metrics
+    busfactor = (0.5) * ((numcontributors / numcommits) + (numcontributors / numfiles)); //Calculate the score as an average between two metrics
     if busfactor > 1.0 {
         return 1.0;
     }
