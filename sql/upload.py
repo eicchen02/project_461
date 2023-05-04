@@ -12,9 +12,7 @@ def upload():
     data = json.load(f)[0]
     f.close()
 
-    f2 = open('temp_link.txt')
-    repo_url = f2.read()
-    f2.close()
+    repo_url = data["URL"]
 
     repo_name = re.search(r'.+\/(.+)$', repo_url)
     if repo_name is None:

@@ -120,7 +120,7 @@ fn main(){
         else{
             write!(log2, "\nNo Javascript in folder {}\n", folder_num).expect("Error writing to log");
             
-            write!(out_file, "0.0\n").expect("Error writing rampup to output");
+            write!(out_file, "0.5\n").expect("Error writing rampup to output");
         }
         //increment the folder counter
         folder_num+=1;
@@ -133,7 +133,7 @@ fn calculate_ramp_up(lines_of_code: u32, lines_of_comments: u32) -> f32{
     //calculate RampUp score using our formula
     let float_code= lines_of_code as f32;
     let float_comments = lines_of_comments as f32;
-    let calculated_score: f32 = 2.0 * (float_comments / float_code);
+    let calculated_score: f32 = 5.0 * (float_comments / float_code);
 
     //return 1 if the calculated score was greater than 1 and return the calculated score if it was less than 1
     if calculated_score > 1.0 {
