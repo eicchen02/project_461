@@ -488,6 +488,7 @@ def PackageRetrieve(id=None):
                 break
             yield data
         yield   '"}}'
+        f.close()
     return Response(generator(packageMetadata, result[2], base64PackagePath), content_type='application/json')
 
 #? This will replace the current ID with a new package 
